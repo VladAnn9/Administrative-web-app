@@ -58,5 +58,5 @@ And the app will automatically open in your browser tab.
 
 Welcome to check it out. Hope you enjoy it.
 
-If you have any suggestions, I'm open to hear from you :)
+If you have some suggestions, I'm open to hear from you :)
     
