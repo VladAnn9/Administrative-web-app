@@ -1,0 +1,143 @@
+<div class="row ">
+  <div class="col-12">
+    <p class="text-center">
+      Nowy document {{docType}}, dnia {{docDate}} utworzony przez {{userName$ | async | uppercase}}.
+    </p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
+    <div class="p-relative">
+      <mat-form-field color="accent">
+        <input #documentsFilter matInput placeholder="Filtruj grupy" />
+      </mat-form-field>
+      
+      <div class="spinner-container" *ngIf="dataSource.loading$ | async">
+        <mat-spinner></mat-spinner>
+      </div>
+      
+      <div class="mat-elevation-z8">
+        <table
+          mat-table
+          [dataSource]="dataSource"
+          matSort
+          matSortActive="nazwa"
+          matSortDirection="asc"
+          matSortDisableClear
+        >
+          <!-- ID Column -->
+          <ng-container matColumnDef="nazwa">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nazwa</th>
+            <td mat-cell *matCellDef="let row">{{ row.nazwa }}</td>
+          </ng-container>
+      
+          <!-- Progress Column -->
+          <ng-container matColumnDef="grupa">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Grupa</th>
+            <td mat-cell *matCellDef="let row">{{ row.grupa }}</td>
+          </ng-container>
+      
+          <!-- Name Column -->
+          <ng-container matColumnDef="uwagi">
+            <th mat-header-cell *matHeaderCellDef>Uwagi</th>
+            <td mat-cell *matCellDef="let row">
+              <input
+                matInput
+                type="text"
+                placeholder="Twoje uwagi"
+                value="{{ row.uwagi }}"
+                (blur)="updateTable($event.target.value, row, 'uwagi')"
+              />
+            </td>
+          </ng-container>
+      
+          <ng-container matColumnDef="stan">
+            <th
+              [style.width.%]="10"
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Stan
+            </th>
+            <td [style.width.%]="10" mat-cell *matCellDef="let row">
+              <input
+                matInput
+                type="number"
+                placeholder="0"
+                min="0"
+                value="{{ row.stan }}"
+                (blur)="updateTable($event.target.value, row, 'stan')" required
+              />
+              <mat-error *ngIf="fillError[row.id]">Wpisz stan</mat-error>
+            </td>
+          </ng-container>
+      
+          <ng-container matColumnDef="ilosc">
+            <th
+              [style.width.%]="12"
+              mat-header-cell
+              *matHeaderCellDef
+              mat-sort-header
+            >
+              Iłość
+            </th>
+            <td [style.width.%]="12" mat-cell *matCellDef="let row">
+              <input
+                matInput
+                type="number"
+                placeholder="Podaj iłość"
+                min="1"
+                value="{{ row.ilosc }}"
+                (blur)="updateTable($event.target.value, row, 'ilosc')" required
+              />
+              <mat-error *ngIf="fillError[row.id]">Wpisz iłość</mat-error>
+            </td>
+          </ng-container>
+      
+          <ng-container matColumnDef="cena">
+            <th
+              [style.width.%]="10"
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Cena
+            </th>
+            <td [style.width.%]="10" mat-cell *matCellDef="let row">
+              <input
+                matInput
+                type="number"
+                placeholder="Cena"
+                value="{{ row.cena }}"
+                (blur)="updateTable($event.target.value, row, 'cena')"
+              />
+            </td>
+          </ng-container>
+      
+          <tr  mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr [style.background]="coloredRows[row.id] ? '#fdcf9c' : 'white'" mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      
+        <mat-paginator
+          color="accent"
+          [length]="resultsLength"
+          [pageSize]="10"
+          [pageSizeOptions]="[5, 10, 25, 100]"
+        ></mat-paginator>
+      </div>
+    
+    </div>
+  </div>
+</div>
+<div *ngIf="specialProducts.length" class="row mt-4">
+  <div class="col-12">
+    <h4 class="pl-3">Unikalne towary</h4>
+    <mat-card *ngFor="let prod of specialProducts">{{prod.nazwa}}</mat-card>
+  </div>
+</div>
+<div class="row justify-content-end">
+  <div class="col-auto action-btn">
+    <button mat-raised-button (click)="openDialog()">Dodaj unikalny towar</button>
+    <button color="warn" mat-raised-button (click)="done()">Gotowy</button>
+  </div>
+</div>
+

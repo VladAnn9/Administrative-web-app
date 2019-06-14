@@ -1,0 +1,90 @@
+mat-toolbar {
+    background: #fdcf9c;
+    position: fixed;
+
+    .logged {
+        font-size: 16px;
+        font-weight: 300;
+
+        span {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        span:hover {
+            text-decoration: underline;
+        }
+    }
+
+    span {
+        margin: 0 20px;
+        
+        &.heading-spacer {
+            flex: 1 1 auto;
+        }
+
+        button {
+            font-size: 20px;
+        }
+    }
+
+    mat-icon {
+        margin: 0 20px;
+        color: #000000;
+        cursor: pointer;
+    }
+
+    .logo {
+        height: 30px;
+        width: auto;
+    }
+}
+
+/deep/ mat-tab-body { 
+    background: #c89e6d;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.background-root {
+    min-height: 100vh;
+    background: #eeeeee;
+}
+
+.container {
+    padding-top: 64px;
+    padding-bottom: 40px;
+    
+    .tab {
+        padding: 10px;
+        text-align: center;
+
+        a {
+            text-decoration: none;
+            margin-right: 16px;
+            transition: all 0.2s;
+        }
+
+        a:hover {
+            color: #000000;
+            background: #eeeeee;
+        }
+    }
+
+    mat-tab-group {
+        margin-bottom: 20px;
+    }
+
+    .action-btn {
+        margin-top: 30px;        
+        
+        button:first-child {
+            margin-right: 20px;
+        }
+    }
+
+}
+

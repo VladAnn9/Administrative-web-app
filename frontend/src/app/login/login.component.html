@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-12 ">
+      <div *ngIf="loggedIn !== undefined && !loggedIn" class="text-center mb-5">
+        <span class="error-login">Niepoprawne hasło lub nazwa.</span>
+      </div>
+
+      <form [formGroup]="loginForm" class="text-center" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <mat-form-field appearance="outline">
+              <mat-label>Nazwa</mat-label>
+              <input matInput type="name" placeholder="Your email" formControlName="name" required>
+              <mat-error *ngIf="loginForm.controls.name.invalid">Muśisz wpisać nazwę</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="form-group">
+          <mat-form-field appearance="outline">
+              <mat-label>Hasło</mat-label>
+              <input matInput type="password" placeholder="Your password" formControlName="password" required>
+              <mat-error *ngIf="loginForm.controls.password.invalid">Muśisz wpisać hasło</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn-login" mat-button>Zaloguj</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

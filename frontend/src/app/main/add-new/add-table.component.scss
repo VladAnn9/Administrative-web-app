@@ -1,0 +1,41 @@
+.p-relative {
+    position: relative;
+}
+
+table {
+    width: 100%;
+
+    td {
+        padding-right: 10px;
+    }
+}
+
+.add-doc-info {
+    // margin-top: 20px;
+}
+
+.mat-form-field {
+    // font-size: 14px;
+    width: 100%;
+}
+
+.action-btn {
+    margin-top: 30px;        
+    
+    button:first-child {
+        margin-right: 20px;
+    }
+}
+
+.spinner-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 56px;
+    right: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
