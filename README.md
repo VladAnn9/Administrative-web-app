@@ -1,2 +1,10 @@
 # Administrative-web-app
-Admin/management web application for inner work of the company
+
+    Description
+
+## How to launch the App?
+
+    First go to 'backend' and 'early-stage-manager' folders and install npm packages:
+
+        npm install
+
