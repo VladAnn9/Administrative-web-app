@@ -3,16 +3,34 @@ const documents = require('express').Router();
 // Load the MySQL pool connection
 const pool = require('../data/config');
 
+documents.get('/docN/:id', (req, res) => {
+    pool.query(`SELECT * FROM dokumenty_n WHERE dokumenty_n.id = ?`, req.params.id, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+        res.status(200).send(result[0]);
+    });
+});
+
 documents.get('/products/length', (req, res) => {
-    pool.query(`SELECT COUNT(*) FROM materialy`, (err, result) => {
+    pool.query(`SELECT COUNT(*) FROM materialy WHERE aktywny = 1`, (err, result) => {
         if(err) throw err;
 
         res.status(200).json({ totalNumber: Object.values(result[0])[0] });
     });
 });
 
-documents.get('/documentN/length', (req, res) => {
-    pool.query('SELECT COUNT(*) FROM dokumenty_n WHERE dokumenty_n.rodzaj_dok = ?', req.query.type, (err, result) => {
+documents.get('/products/:id', (req, res) => {
+    const sql = `SELECT materialy.nazwa, materialy.id FROM materialy WHERE materialy.nazwa NOT IN (SELECT materialy.nazwa FROM materialy LEFT JOIN dokumenty_p ON materialy.id = dokumenty_p.materialy_id WHERE dokumenty_p.dok_N_id = ${req.params.id})`
+    pool.query(sql, (err, result) => {
+        if(err) throw err;
+        console.log("RESULT");
+        console.log(result);
+        res.status(200).send(result);
+    });
+});
+
+documents.get('/documentN/length/:id', (req, res) => {
+    pool.query('SELECT COUNT(*) FROM dokumenty_n WHERE dokumenty_n.rodzaj_dok = ? AND dokumenty_n.uzytkownik_id = ?', [req.query.type, req.params.id], (err, result) => {
         if(err) throw err;
 
         res.status(200).json({ totalNumber: Object.values(result[0])[0] });
@@ -39,9 +57,9 @@ documents.get('/findNewTable', (req, res) => {
     
     let sql;
     if(IDN) {
-        sql = `SELECT materialy.id, materialy.nazwa, grupy.nazwa AS grupa, dokumenty_p.ilosc, dokumenty_p.stan, dokumenty_p.cena, dokumenty_p.uwagi FROM materialy JOIN grupy ON (materialy.grupa_id = grupy.id) LEFT JOIN dokumenty_p ON (dokumenty_p.dok_N_id = ${IDN} AND dokumenty_p.materialy_id = materialy.id) ORDER BY ${sortActive} ${sortOrder}`;
+        sql = `SELECT materialy.id, materialy.nazwa, grupy.nazwa AS grupa, dokumenty_p.ilosc, dokumenty_p.stan, dokumenty_p.cena, dokumenty_p.uwagi FROM materialy JOIN grupy ON (materialy.grupa_id = grupy.id) LEFT JOIN dokumenty_p ON (dokumenty_p.dok_N_id = ${IDN} AND dokumenty_p.materialy_id = materialy.id) WHERE materialy.aktywny = 1 ORDER BY ${sortActive} ${sortOrder}`;
     } else {
-        sql = `SELECT materialy.id, materialy.nazwa, grupy.nazwa AS grupa FROM materialy INNER JOIN grupy ON materialy.grupa_id = grupy.id ORDER BY ${sortActive === 'ilosc' ? 'nazwa' : sortActive} ${sortOrder}`;
+        sql = `SELECT materialy.id, materialy.nazwa, grupy.nazwa AS grupa FROM materialy INNER JOIN grupy ON materialy.grupa_id = grupy.id WHERE materialy.aktywny = 1 ORDER BY ${sortActive === 'ilosc' ? 'nazwa' : sortActive} ${sortOrder}`;
     }
     
     pool.query(sql, (err, result) => {
@@ -61,28 +79,45 @@ documents.get('/findNewTable', (req, res) => {
     });
 });
 
-documents.get('/findManageData', (req, res) => {
+documents.get('/findManageData/:id', (req, res) => {
     const queryParams = req.query;
 
     const sortOrder = queryParams.sortOrder,
         sortActive = queryParams.sortActive,
         pageNumber = parseInt(queryParams.pageNumber) || 0,
         pageSize = parseInt(queryParams.pageSize),
-        type = queryParams.type;
-    
-    let sql = `SELECT dokumenty_n.id, dokumenty_n.data, lokalizacje.nazwa AS lokal, dokumenty_n.status FROM dokumenty_n
-    LEFT JOIN uzytkownicy ON dokumenty_n.uzytkownik_id = uzytkownicy.id LEFT JOIN lokalizacje ON uzytkownicy.lokalizacjaId = lokalizacje.id WHERE dokumenty_n.rodzaj_dok = '${type}' ORDER BY ${sortActive} ${sortOrder}`;
-    
-    pool.query(sql, (err, result) => {
-        if(err) throw err;
+        type = queryParams.type,
+        userID = req.params.id;
 
-        const initialPos = pageNumber * pageSize;
-
-        const tablePage = result.slice(initialPos, initialPos + pageSize);
-        console.log(tablePage);
-
-        res.status(200).json({payload: tablePage});
+    pool.query('SELECT uzytkownicy.uprawnienie FROM uzytkownicy WHERE uzytkownicy.id = ?', 
+        userID, (err, result)=> {
+            if(err) throw err;
+            console.log(result);
+            const role = result[0].uprawnienie;
+            if (role === 'root' || role === 'admin') {
+                const sql = `SELECT dokumenty_n.id, dokumenty_n.data, lokalizacje.nazwa AS lokal, dokumenty_n.status FROM dokumenty_n
+                LEFT JOIN uzytkownicy ON dokumenty_n.uzytkownik_id = uzytkownicy.id LEFT JOIN lokalizacje ON uzytkownicy.lokalizacjaId = lokalizacje.id WHERE dokumenty_n.rodzaj_dok = '${type}' ORDER BY ${sortActive} ${sortOrder}`;
+                getDocuments(sql);
+            } else {
+                const sql = `SELECT dokumenty_n.id, dokumenty_n.data, lokalizacje.nazwa AS lokal, dokumenty_n.status FROM dokumenty_n
+                LEFT JOIN uzytkownicy ON dokumenty_n.uzytkownik_id = uzytkownicy.id LEFT JOIN lokalizacje ON uzytkownicy.lokalizacjaId = lokalizacje.id WHERE dokumenty_n.rodzaj_dok = '${type}' AND dokumenty_n.uzytkownik_id = ${userID} ORDER BY ${sortActive} ${sortOrder}`;
+                getDocuments(sql);
+            }
     });
+    
+    function getDocuments (sql) {
+        pool.query(sql, (err, result) => {
+            if(err) throw err;
+    
+            const initialPos = pageNumber * pageSize;
+    
+            const tablePage = result.slice(initialPos, initialPos + pageSize);
+            console.log(tablePage);
+    
+            res.status(200).json({payload: tablePage});
+        });
+
+    };
 });
 
 documents.get('/findDocumentPData', (req, res) => {
@@ -94,10 +129,13 @@ documents.get('/findDocumentPData', (req, res) => {
         pageSize = parseInt(queryParams.pageSize),
         idN = queryParams.id;
 
-    let sql = `SELECT dokumenty_p.id, materialy.nazwa, dokumenty_p.ilosc, dokumenty_p.stan,
-    SUM(dokumenty_p.ilosc * dokumenty_n.mnoznik) AS stanMag, dokumenty_p.uwagi 
-    FROM dokumenty_p LEFT JOIN dokumenty_n ON dokumenty_n.id = dokumenty_p.dok_N_id LEFT JOIN materialy ON materialy.id = dokumenty_p.materialy_id
-    WHERE dokumenty_p.dok_N_id = ${idN} GROUP BY dokumenty_p.materialy_id ORDER BY ${sortActive} ${sortOrder}`;
+    let sql = `
+        SELECT dokumenty_p.id, materialy.nazwa, dokumenty_p.ilosc, dokumenty_p.stan, summary.stanMag,
+        dokumenty_p.uwagi, dokumenty_p.cena FROM dokumenty_p LEFT JOIN materialy ON materialy.id = dokumenty_p.materialy_id 
+        LEFT OUTER JOIN (SELECT SUM(dokumenty_p.ilosc * dokumenty_n.mnoznik) as stanMag, dokumenty_p.materialy_id as materialy FROM dokumenty_p LEFT JOIN dokumenty_n ON dokumenty_n.id = dokumenty_p.dok_N_id GROUP BY dokumenty_p.materialy_id) summary 
+        ON summary.materialy = dokumenty_p.materialy_id
+        WHERE dokumenty_p.dok_N_id = ${idN} ORDER BY ${sortActive} ${sortOrder}
+    `;
 
     pool.query(sql, (err, result) => {
         if(err) throw err;
@@ -138,7 +176,10 @@ documents.post('/', (req, res) => {
 });
 
 documents.put('/n/:id', (req, res) => {
-    pool.query('UPDATE dokumenty_n SET ? WHERE id = ?', [req.body, req.params.id], (err, result) => {
+    let doc = req.body;
+    // doc.data = Date(req.body.data);
+    console.log(req.body);
+    pool.query('UPDATE dokumenty_n SET ? WHERE id = ?', [doc, req.params.id], (err, result) => {
         if (err) throw err;
 
         res.status(201).send({Message: `Document with id: ${req.params.id} sended successfully.`});
@@ -147,7 +188,9 @@ documents.put('/n/:id', (req, res) => {
 
 documents.put('/single-p/:id', (req, res) => {
     const p = req.body;
-    pool.query(`UPDATE dokumenty_p SET ilosc = ${p.ilosc}, stan = ${p.stan}, uwagi = '${p.uwagi}' WHERE id = ?`, req.params.id, (err, result) => {
+    p.cena = Number(p.cena) ? Number(p.cena) : p.cena = null;
+
+    pool.query(`UPDATE dokumenty_p SET ilosc = ${p.ilosc}, stan = ${p.stan}, uwagi = '${p.uwagi}', cena = ${p.cena} WHERE id = ?`, req.params.id, (err, result) => {
         if(err) throw err;
         res.status(201).send({Message: 'Document P updated.'});
     });
@@ -158,7 +201,7 @@ documents.put('/p/:id', (req, res) => {
     p.stan = Number(p.stan) ? Number(p.stan) : p.stan = 0;
     p.cena = Number(p.cena) ? Number(p.cena) : p.cena = null;
 
-// Then if order is created I am postin or updating items in that order
+// Then if order is created I am posting or updating items in that order
     const docP = [p.id, p.ilosc, req.params.id, p.stan, p.cena, p.uwagi];
     pool.query(`UPDATE dokumenty_p SET materialy_id = ?, ilosc = ?, dok_N_id = ?, stan = ?, cena = ?, uwagi = ? WHERE materialy_id = ${p.id} && dok_N_id = ${req.params.id}`, docP, (err, result) => {
         if(err) throw err;
@@ -187,7 +230,7 @@ documents.delete('/p/:id', (req, res) => {
     pool.query('DELETE FROM dokumenty_p WHERE id = ?', id, (error, result) => {
         if (error) throw error;
 
-        res.status(200).send({Message: 'Item deleted'});
+        res.status(200).send({Message: 'Item was deleted'});
     });
 });
 
@@ -218,11 +261,32 @@ documents.post('/createWZ/:id', (req, res) => {
     });
 });
 
-documents.get('/nType/:id', (req, res) => {
-    pool.query('SELECT dokumenty_n.rodzaj_dok FROM dokumenty_n WHERE id = ?', req.params.id, (err, result) => {
+documents.put('/statusDocN/:id', (req, res) => {
+    pool.query(`UPDATE dokumenty_n SET dokumenty_n.status = ? WHERE dokumenty_n.id = ?`, [req.body.status,req.params.id], (err, result) => {
+        if(err) throw err;
+        res.status(201).send({Message: `Changed status on ${req.body.status} in ${req.params.id} document`});
+    }); 
+});
+
+documents.get('/nTypeAndStatus/:id', (req, res) => {
+    pool.query('SELECT dokumenty_n.rodzaj_dok, dokumenty_n.status FROM dokumenty_n WHERE id = ?', req.params.id, (err, result) => {
         if(err) throw err;
 
         res.status(200).send(result[0]);
+    });
+});
+
+documents.get('/checkAccessCreateNew/:id', (req, res) => {
+    const sql = `SELECT COUNT(*) FROM dokumenty_n WHERE dokumenty_n.uzytkownik_id = ${req.params.id} AND dokumenty_n.rodzaj_dok = '${req.query.type}' AND dokumenty_n.status = 'edycja'`;
+    pool.query(sql, (err, result) => {
+        if(err) throw err;
+        const point = Object.values(result[0])[0];
+
+        if(point === 0) {
+            res.status(200).send({Access: true});
+        } else {
+            res.status(200).send({Access: false});
+        }
     });
 });
 

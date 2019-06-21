@@ -183,9 +183,11 @@ export class AddTableComponent implements OnInit, AfterViewInit {
   done(): void {
     this.documentN.status = 'gotowy';
     this.documentN.id = this.idN;
-    this.documentsService.updateDocumentN(this.documentN).subscribe(data => console.log(data));
+    this.documentsService.updateDocumentN(this.documentN).subscribe(data => {
+       console.log(data);
+       this.router.navigate(['../../look', this.docType], { relativeTo: this.route });
+    });
     // this.selectedTab = 1;
-    this.router.navigate(['../../look', this.docType], { relativeTo: this.route });
   }
 
 

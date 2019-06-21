@@ -17,39 +17,39 @@
       </mat-menu>
 
       <mat-menu #zamowienia="matMenu">
-          <button mat-menu-item>Przeglądanie</button>
+          <button mat-menu-item [routerLink]="['./look', 'Z']">Przeglądanie</button>
           <button *ngIf="role !== 'inni'"
-            mat-menu-item >Nowe zamówienie</button>
+            mat-menu-item [routerLink]="['./add-new', 'Z']">Nowe zamówienie</button>
       </mat-menu>
 
       <mat-menu #przyjecia="matMenu">
-          <button mat-menu-item>Przeglądanie</button>
-          <button mat-menu-item>Nowe przyjęcie</button>
+          <button mat-menu-item [routerLink]="['./look', 'PZ']">Przeglądanie</button>
+          <button mat-menu-item [routerLink]="['./add-new', 'PZ']">Nowe przyjęcie</button>
       </mat-menu>
 
       <mat-menu #wydania="matMenu">
-          <button mat-menu-item>Przeglądanie</button>
+          <button mat-menu-item [routerLink]="['./look', 'WZ']">Przeglądanie</button>
           <button *ngIf="role === 'root' || role === 'admin'" 
-            mat-menu-item>Nowe wydanie</button>
+            mat-menu-item [routerLink]="['./add-new', 'WZ']">Nowe wydanie</button>
       </mat-menu>
       <mat-menu #inwentaryzacja="matMenu">
-          <button mat-menu-item>Przeglądanie</button>
+          <button mat-menu-item [routerLink]="['./look', 'I']">Przeglądanie</button>
           <button *ngIf="role !== 'inni'"
-            mat-menu-item>Nowa inwentaryzacja</button>
+            mat-menu-item [routerLink]="['./add-new', 'I']">Nowa inwentaryzacja</button>
       </mat-menu>
       <mat-menu #zniszczenia="matMenu">
-          <button mat-menu-item>Przeglądanie</button>
-          <button mat-menu-item >Nowe zniszczenie</button>
+          <button mat-menu-item [routerLink]="['./look', 'ZN']">Przeglądanie</button>
+          <button mat-menu-item [routerLink]="['./add-new', 'ZN']">Nowe zniszczenie</button>
       </mat-menu>
     </span>
     <span *ngIf="role === 'root' || role === 'admin'">
       <button mat-button [matMenuTriggerFor]="tabels">Tabele</button>
 
       <mat-menu #tabels="matMenu">
-          <button mat-menu-item>Użytkownicy</button>
-          <button mat-menu-item>Materialy</button>
-          <button mat-menu-item>Grupy</button>
-          <button mat-menu-item>Lokalizacje</button>
+          <button mat-menu-item [routerLink]="['./manage', 'uzytkownicy']">Użytkownicy</button>
+          <button mat-menu-item [routerLink]="['./manage', 'materialy']">Materialy</button>
+          <button mat-menu-item [routerLink]="['./manage', 'grupy']">Grupy</button>
+          <button mat-menu-item [routerLink]="['./manage', 'lokalizacje']">Lokalizacje</button>
       </mat-menu>
     </span>
     <span class="heading-spacer"></span>
@@ -65,17 +65,16 @@
                   mat-stretch-tabs dynamicHeight color="warn">
       <mat-tab *ngIf="role !== 'inni'" label="Dodaj">
         <div class="tab">
-          <a mat-raised-button [routerLink]="['./add-new', 'Z']">Zamówienia (Z)</a>
+          <a mat-raised-button (click)="getRoute('Z')">Zamówienia (Z)</a>
           <a mat-raised-button 
             *ngIf="role === 'root' || role === 'admin'"
             [routerLink]="['./add-new', 'PZ']">Przyjęcia (PZ)</a>
           <a mat-raised-button 
             *ngIf="role === 'root' || role === 'admin'"
             [routerLink]="['./add-new', 'WZ']">Wydania (WZ)</a>
-          <a mat-raised-button [routerLink]="['./add-new', 'I']">Inwentaryzacje (I)</a>
+          <a mat-raised-button (click)="getRoute('I')">Inwentaryzacje (I)</a>
           <a mat-raised-button 
-            *ngIf="role !== 'inni'" 
-            [routerLink]="['./add-new', 'ZN']"> Zniszczenia (ZN)</a>
+            *ngIf="role !== 'inni'" (click)="getRoute('ZN')"> Zniszczenia (ZN)</a>
         </div>
       </mat-tab>
       <mat-tab label="Przeglądaj">

@@ -1,0 +1,28 @@
+<h1 mat-dialog-title>Dodaj: </h1>
+<div mat-dialog-content>
+  <div *ngFor="let col of data.columns">
+    <div *ngIf="col === 'aktywny'">
+      <mat-slide-toggle [checked]="true" 
+        (change)="changeActive($event, col)">aktywny</mat-slide-toggle>
+    </div>
+
+    <mat-form-field *ngIf="col !== 'id' && col !== 'aktywny' && col !== 'grupa_id' && col !== 'lokalizacjaId'">
+      <input matInput type="text || number" placeholder="{{col}}" (blur)="save($event.target.value, col)">
+    </mat-form-field>
+
+    <mat-form-field *ngIf="col === 'grupa_id' || col === 'lokalizacjaId'">
+      <input type="text" matInput placeholder="{{col}}" [formControl]="formControl"
+        [matAutocomplete]="auto">
+      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" 
+        (optionSelected)="setID($event.option.value, col)">
+        <mat-option *ngFor="let option of filteredValues | async" [value]="option.id">
+          {{option.id}} : {{ option.nazwa }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cofnij</button>
+  <button mat-button [mat-dialog-close]="result" cdkFocusInitial>Ok</button>
+</div>

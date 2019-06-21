@@ -1,0 +1,28 @@
+<h1 mat-dialog-title>Dodaj towar</h1>
+<div mat-dialog-content>
+  <mat-form-field>
+    <input type="text" placeholder="Wybież towar" aria-label="Towar" matInput [formControl]="formControl"           [matAutocomplete]="auto" required>
+    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" 
+        (optionSelected)="findID($event.option.value)">
+        <mat-option *ngFor="let product of filteredProducts | async" [value]="product.nazwa">
+        {{product.nazwa}}
+        </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput type="number" min="1" placeholder="Ilość" required [(ngModel)]="documentP.ilosc">
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput type="number" min="0" placeholder="Stan" required [(ngModel)]="documentP.stan">
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput type="text" placeholder="Uwagi" [(ngModel)]="documentP.uwagi">
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput type="number" placeholder="Cena" [(ngModel)]="documentP.cena">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cofnij</button>
+  <button mat-button [mat-dialog-close]="documentP" cdkFocusInitial>Ok</button>
+</div>

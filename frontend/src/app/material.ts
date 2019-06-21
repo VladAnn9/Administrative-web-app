@@ -17,6 +17,8 @@ import {MatSortModule} from '@angular/material/sort';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatCardModule} from '@angular/material/card';
 import {MatListModule} from '@angular/material/list';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 
 @NgModule({
   imports: [
@@ -38,7 +40,9 @@ import {MatListModule} from '@angular/material/list';
      MatProgressSpinnerModule,
      MatDialogModule,
      MatCardModule,
-     MatListModule
+     MatListModule,
+     MatAutocompleteModule,
+     MatSlideToggleModule
     ],
   exports: [
     MatButtonModule,
@@ -59,7 +63,9 @@ import {MatListModule} from '@angular/material/list';
     MatProgressSpinnerModule,
     MatDialogModule,
     MatCardModule,
-    MatListModule
+    MatListModule,
+    MatAutocompleteModule,
+    MatSlideToggleModule
   ],
 })
 export class MaterialModule { }

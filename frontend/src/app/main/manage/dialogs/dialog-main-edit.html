@@ -1,0 +1,28 @@
+<h1 mat-dialog-title >Edytuj {{data.row.nazwa}}</h1>
+<div mat-dialog-content>
+  <div *ngFor="let el of data.row | keyvalue" class="mt-2">
+    <div *ngIf="el.key === 'aktywny'">
+        <mat-slide-toggle [checked]="data.row.aktywny" [(ngModel)]="el.value" 
+          (change)="changeActive(el)">aktywny</mat-slide-toggle>
+    </div>
+    <mat-form-field *ngIf="el.key !== 'id' && el.key !== 'aktywny' && el.key !== 'grupa_id' && el.key !== 'lokalizacjaId'">
+      <input 
+        matInput type="" placeholder="{{el.key}}" [(ngModel)]="el.value" (blur)="save(el)">
+    </mat-form-field>
+
+    <mat-form-field *ngIf="el.key === 'grupa_id' || el.key === 'lokalizacjaId'">
+      <input type="text" matInput placeholder="{{el.key}}" [formControl]="formControl"
+        [matAutocomplete]="auto">
+      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" 
+        (optionSelected)="setID($event.option.value, el)">
+          <mat-option *ngFor="let option of filteredValues | async" [value]="option.id">
+            {{option.id}} : {{ option.nazwa }}
+          </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+</div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cofnij</button>
+  <button mat-button [mat-dialog-close]="data.row" cdkFocusInitial>Ok</button>
+</div>

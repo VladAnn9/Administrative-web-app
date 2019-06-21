@@ -20,12 +20,12 @@ export class LookTableDataSource implements DataSource<ShortManageTable> {
     loadManageData(sortDirection: string,
                    sortActive: string,
                    pageIndex: number,
-                   pageSize: number, type: string) {
+                   pageSize: number, type: string, id: string) {
 
         this.loadingSubject.next(true);
 
         this.documentsService.findLookTableData(sortDirection, sortActive,
-            pageIndex, pageSize, type).pipe(
+            pageIndex, pageSize, type, id).pipe(
                 catchError(() => of([])),
                 finalize(() => this.loadingSubject.next(false))
             )

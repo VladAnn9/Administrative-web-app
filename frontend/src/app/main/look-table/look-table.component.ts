@@ -19,6 +19,7 @@ export class LookTableComponent implements OnInit, AfterViewInit {
   displayedLookColumns = ['id', 'data', 'lokal', 'status'];
   dataSourceLookTable: LookTableDataSource;
   typeOfDoc: string;
+  currentUserID: string;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -30,14 +31,15 @@ export class LookTableComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
+    this.currentUserID = this.route.snapshot.parent.params.id;
     this.route.paramMap.pipe(
       switchMap((params: ParamMap) => {
         return this.typeOfDoc = params.get('type');
       })
     ).subscribe(() => {
-      this.documentsService.getDocumentNLength(this.typeOfDoc).subscribe(total => this.resultLength = total);
+      this.documentsService.getDocumentNLength(this.typeOfDoc, this.currentUserID).subscribe(total => this.resultLength = total);
       this.dataSourceLookTable = new LookTableDataSource(this.documentsService);
-      this.dataSourceLookTable.loadManageData('desc', 'data', 0, 10, this.typeOfDoc);
+      this.dataSourceLookTable.loadManageData('desc', 'data', 0, 10, this.typeOfDoc, this.currentUserID);
       console.log(this.typeOfDoc);
     });
   }
@@ -58,7 +60,8 @@ export class LookTableComponent implements OnInit, AfterViewInit {
       this.sort.active,
       this.paginator.pageIndex,
       this.paginator.pageSize,
-      this.typeOfDoc);
+      this.typeOfDoc,
+      this.currentUserID);
   }
 
   details(row: any) {

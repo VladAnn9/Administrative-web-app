@@ -23,9 +23,9 @@ export class DocumentsService {
 
     constructor(private http: HttpClient) {}
 
-    getDocumentNLength(type: string): Observable<number> {
+    getDocumentNLength(type: string, id: string): Observable<number> {
 // tslint:disable-next-line: no-string-literal
-      return this.http.get(`${this.url}/documentN/length`, {
+      return this.http.get(`${this.url}/documentN/length/${id}`, {
         params: new HttpParams().set('type', type)
 // tslint:disable-next-line: no-string-literal
       }).pipe(map(res => res['totalNumber']));
@@ -49,7 +49,7 @@ export class DocumentsService {
         return this.http.post(this.url, document, httpOptions);
     }
 
-    updateDocumentP(documentP: DocumentP, idN: number): Observable<any> {
+    updateDocumentP(documentP: DocumentP, idN: number | string): Observable<any> {
       return this.http.put(`${this.url}/p/${idN}`, documentP, httpOptions);
     }
 
@@ -79,8 +79,8 @@ export class DocumentsService {
     }
 
     findLookTableData(sortOrder = 'desc', sortActive = 'data',
-                      pageNumber = 0, pageSize = 10, type: string): Observable<ShortManageTable[]> {
-        return this.http.get(`${this.url}/findManageData`, {
+                      pageNumber = 0, pageSize = 10, type: string, id: string): Observable<ShortManageTable[]> {
+        return this.http.get(`${this.url}/findManageData/${id}`, {
           params: new HttpParams()
               .set('sortOrder', sortOrder)
               .set('sortActive', sortActive)
@@ -119,10 +119,21 @@ export class DocumentsService {
     }
 
     copyToWZ(idN: string): Observable<any> {
-      return this.http.post(`${this.url}/createWZ/${idN}`, {id: idN}, httpOptions);
+      return this.http.post(`${this.url}/createWZ/${idN}`, httpOptions);
     }
 
-    getDocNType(idN: string): Observable<string> {
-      return this.http.get<DocumentN>(`${this.url}/nType/${idN}`).pipe(map(data => data.rodzaj_dok));
+    updateStatus(idN: string, status: string): Observable<any> {
+      return this.http.put(`${this.url}/statusDocN/${idN}`, {status}, httpOptions);
+    }
+
+    getDocumentN(idN: string): Observable<DocumentN> {
+      return this.http.get<DocumentN>(`${this.url}/docN/${idN}`).pipe(map(data => data));
+    }
+
+    checkAccessOnCreateNew(type: string, userID: number): Observable<boolean> {
+      return this.http.get<boolean>(`${this.url}/checkAccessCreateNew/${userID}`, {
+        params: new HttpParams().set('type', type)
+// tslint:disable-next-line: no-string-literal
+      }).pipe(map(data => data['Access']));
     }
 }

@@ -50,7 +50,8 @@ export class RootComponent implements OnInit {
     private productService: ProductsService,
     private documentsService: DocumentsService,
     public dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
     ) {
       this.getUser();
   }
@@ -82,7 +83,21 @@ export class RootComponent implements OnInit {
     this.userService.getUsers().subscribe(users => {this.users = users; console.log(users); });
   }
 
+  getRoute(type: string): void {
+    if (this.role === 'root' || this.role === 'admin') {
+      this.router.navigate(['./add-new', type], { relativeTo: this.route });
+    } else {
+        this.documentsService.checkAccessOnCreateNew(type, this.currentUser.id).subscribe(access => {
+          console.log(access);
+          if (access) {
+            this.router.navigate(['./add-new', type], { relativeTo: this.route });
+          } else {
+            this.router.navigate(['./look', type], { relativeTo: this.route });
+          }
+        });
 
+    }
+  }
 
   logout(): void {
     this.auth.logout();

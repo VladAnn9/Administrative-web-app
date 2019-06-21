@@ -9,7 +9,7 @@ users.get('/user/authenticate', (req, res) => {
     const decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY);
     // console.log(decoded);
     
-    pool.query('SELECT * FROM uzytkownicy WHERE id = ?', decoded.id, (err, result) => {
+    pool.query('SELECT * FROM uzytkownicy WHERE id = ? && aktywny = 1', decoded.id, (err, result) => {
         if(err) throw err;
 
         if(result[0]) {

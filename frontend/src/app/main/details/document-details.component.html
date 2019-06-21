@@ -13,19 +13,12 @@
         matSortDirection="asc"
         matSortDisableClear
       >
-        <!-- ID Column -->
-        <!-- <ng-container matColumnDef="lp">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>LP</th>
-          <td mat-cell *matCellDef="let row">{{ row.lp }}</td>
-        </ng-container> -->
       
-        <!-- Progress Column -->
         <ng-container matColumnDef="nazwa">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Nazwa</th>
           <td mat-cell *matCellDef="let row">{{ row.nazwa }}</td>
         </ng-container>
-      
-        <!-- Name Column -->
+ 
         <ng-container matColumnDef="ilosc">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Iłość</th>
           <td mat-cell *matCellDef="let row">{{row.ilosc}}</td>
@@ -47,12 +40,29 @@
             <th mat-header-cell *matHeaderCellDef>Uwagi</th>
             <td mat-cell *matCellDef="let row">{{row.uwagi}}</td>
         </ng-container>
+
+        <ng-container matColumnDef="cena">
+            <th mat-header-cell *matHeaderCellDef>Cena</th>
+            <td mat-cell *matCellDef="let row">{{row.cena}}</td>
+        </ng-container>
     
         <ng-container matColumnDef="akcje">
             <th mat-header-cell *matHeaderCellDef>Akcje</th>
             <td mat-cell *matCellDef="let row">
-              <button mat-icon-button color="accent"><mat-icon (click)="openDialog(row)">edit</mat-icon></button>
-              <button mat-icon-button color="warn"><mat-icon (click)="delete(row)">close</mat-icon></button>
+              <ng-container *ngIf="(userRole$ | async) === 'inni' || (userRole$ | async) === 'biuro'; then thenBlock; else elseBlock">
+              </ng-container>
+              <ng-template #thenBlock >
+                <button mat-icon-button [disabled]="status !== 'edycja' || typeDoc === 'WZ'" color="accent"><mat-icon 
+                  (click)="(status === 'edycja' && typeDoc !== 'WZ') ? openEditDialog(row) : ''">edit</mat-icon></button>
+                <button mat-icon-button [disabled]="status !== 'edycja' || typeDoc === 'WZ'"
+                  color="warn"><mat-icon 
+                  (click)="(status === 'edycja' && typeDoc !== 'WZ') ? delete(row) : ''">close</mat-icon></button>
+              </ng-template>
+              <ng-template #elseBlock>
+                <button mat-icon-button color="accent" (click)="openEditDialog(row)"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button
+                  color="warn" (click)="delete(row)"><mat-icon >close</mat-icon></button>
+              </ng-template>
             </td>
         </ng-container>
       
@@ -67,9 +77,40 @@
       [pageSizeOptions]="[5, 10, 25, 100]"  
       ></mat-paginator>
     </div>
-    
-    <div *ngIf="(userRole$ | async) === 'root' || (userRole$ | async) === 'admin'" class="d-flex justify-content-end mt-4">
-      <button mat-raised-button *ngIf="(typeDoc$ | async) === 'Z'" color="warn" (click)="makeWz()">Rób WZ</button>
-    </div>
   </div>
 </div>
+
+<ng-template *ngIf="((userRole$ | async) === 'root' || (userRole$ | async) === 'admin'); then thenBlockBtns;
+  else elseBlockBtns" ></ng-template>
+<ng-template #thenBlockBtns>
+  <div class="row justify-content-between">
+    <div class="col-auto">
+      <div *ngIf="status !== 'zrobione wz'" class="d-inline-flex mt-4 mr-3">
+        <button mat-raised-button *ngIf="typeDoc === 'Z'" color="accent" (click)="makeWz()">Rób WZ</button>
+      </div>
+      <div *ngIf="status === 'edycja'" class="d-inline-flex mt-4">
+        <button mat-raised-button color="warn" (click)="updateStatus('gotowy')">Gotowy</button>
+      </div>
+    </div>
+    <div class="col-auto">
+        <div class="mt-4">
+          <button mat-raised-button (click)="openAddTowarDialog()">Dodaj Towar</button>
+        </div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #elseBlockBtns>
+  <div *ngIf="status === 'edycja' && typeDoc !== 'WZ'" class="row justify-content-between">
+    <div class="col-auto">
+      <div class="d-inline-flex mt-4">
+        <button mat-raised-button color="warn" (click)="updateStatus('gotowy')">Gotowy</button>
+      </div>
+    </div>
+    <div  class="col-auto">
+        <div class="mt-4">
+          <button mat-raised-button (click)="openAddTowarDialog()">Dodaj Towar</button>
+        </div>
+    </div>
+  </div>
+</ng-template>
+

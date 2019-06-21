@@ -134,10 +134,12 @@
     <mat-card *ngFor="let prod of specialProducts">{{prod.nazwa}}</mat-card>
   </div>
 </div>
-<div class="row justify-content-end">
-  <div class="col-auto action-btn">
-    <button mat-raised-button (click)="openDialog()">Dodaj unikalny towar</button>
+<div class="row justify-content-between">
+  <div class="col-auto mt-4">
     <button color="warn" mat-raised-button (click)="done()">Gotowy</button>
+  </div>
+  <div class="col-auto mt-4">
+    <button mat-raised-button (click)="openDialog()">Dodaj unikalny towar</button>
   </div>
 </div>
 

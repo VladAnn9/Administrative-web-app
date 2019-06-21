@@ -14,9 +14,9 @@ export class ProductsService {
 
     constructor(private http: HttpClient) {}
 
-    // getProducts(): Observable<Product[]> {
-    //     return this.http.get<Product[]>(this.url);
-    // }
+    getDistinctProducts(idN: string): Observable<Product[]> {
+      return this.http.get<Product[]>(`${this.url}/${idN}`);
+    }
 
     getProductsLength(): Observable<number> {
 // tslint:disable-next-line: no-string-literal

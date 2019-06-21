@@ -56,7 +56,7 @@ export class AuthenticationService {
         return this.http.get<User>(`${this.url}users/user/authenticate`, {
             headers: { Authorization: `${this.getToken()}` }
         }).pipe(data => {
-            console.log(data); // TODO -> check if there response has no errors else navigate to /login
+            console.log(data);
             return data;
         });
     }
