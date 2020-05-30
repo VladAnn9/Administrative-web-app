@@ -8,7 +8,7 @@ First clone the project:
 
     git clone https://github.com/VladAnn9/Administrative-web-app.git
 
-After this go to 'backend' and 'early-stage-manager' folders and install npm packages:
+After this go to 'backend' and 'frontend' folders and install npm packages:
 
     npm install
     
