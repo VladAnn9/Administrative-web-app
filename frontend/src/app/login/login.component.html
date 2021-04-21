@@ -9,14 +9,14 @@
         <div class="form-group">
           <mat-form-field appearance="outline">
               <mat-label>Nazwa</mat-label>
-              <input matInput type="name" placeholder="Your email" formControlName="name" required>
+              <input matInput type="name" formControlName="name" required>
               <mat-error *ngIf="loginForm.controls.name.invalid">Muśisz wpisać nazwę</mat-error>
           </mat-form-field>
         </div>
         <div class="form-group">
           <mat-form-field appearance="outline">
               <mat-label>Hasło</mat-label>
-              <input matInput type="password" placeholder="Your password" formControlName="password" required>
+              <input matInput type="password" formControlName="password" required>
               <mat-error *ngIf="loginForm.controls.password.invalid">Muśisz wpisać hasło</mat-error>
           </mat-form-field>
         </div>

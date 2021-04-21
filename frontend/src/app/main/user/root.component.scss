@@ -1,6 +1,11 @@
+@import "~bootstrap/scss/mixins/breakpoints";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+
 mat-toolbar {
     background: #fdcf9c;
     position: fixed;
+    z-index: 1;
 
     .logged {
         font-size: 16px;
@@ -10,7 +15,6 @@ mat-toolbar {
             font-size: 20px;
             font-weight: 500;
             margin: 0;
-            cursor: pointer;
             transition: all 0.1s;
         }
 
@@ -29,12 +33,30 @@ mat-toolbar {
         button {
             font-size: 20px;
         }
+
+        @include media-breakpoint-down(sm) { 
+            & {
+                margin: 0;
+                
+                & button {
+                    font-size: 16px;
+                }
+            } 
+        }
     }
 
     mat-icon {
         margin: 0 20px;
         color: #000000;
+        outline: none;
         cursor: pointer;
+
+        @include media-breakpoint-down(xs) {
+            margin: 0 6px;
+            font-size: 20px;
+            height: 20px;
+            width: 20px;
+        }
     }
 
     .logo {
@@ -43,48 +65,30 @@ mat-toolbar {
     }
 }
 
-/deep/ mat-tab-body { 
-    background: #c89e6d;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
 .background-root {
     min-height: 100vh;
     background: #eeeeee;
 }
 
 .container {
-    padding-top: 64px;
+    padding-top: 100px;
     padding-bottom: 40px;
-    
-    .tab {
-        padding: 10px;
-        text-align: center;
 
-        a {
-            text-decoration: none;
-            margin-right: 16px;
-            transition: all 0.2s;
-        }
-
-        a:hover {
-            color: #000000;
-            background: #eeeeee;
-        }
-    }
-
-    mat-tab-group {
-        margin-bottom: 20px;
-    }
-
-    .action-btn {
-        margin-top: 30px;        
+    @include media-breakpoint-down(md) {
+        width: 100%;
+        max-width: none;
         
-        button:first-child {
-            margin-right: 20px;
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    app-settings {
+        .main-container {
+            flex-direction: column !important;
+
         }
     }
 
 }
+
 

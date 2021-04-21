@@ -1,9 +1,9 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, Inject } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { MatPaginator, MatSort } from '@angular/material';
-import { merge, fromEvent, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, tap, delay } from 'rxjs/operators';
+import { merge, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 
 import { DocumentsService } from '../../services/documents.service';
@@ -15,6 +15,9 @@ import { Product } from '../../models/product';
 import { DatailsTableDataSource } from './details.datasource';
 import { DialogDetailsEditComponent } from './dialogs/dialog-details-edit.component';
 import { DialogAddTowarComponent } from './dialogs/dialog-add-towar.component';
+import { DialogConfirmationComponent } from './dialogs/dialog-confirm.component';
+import { DialogDeleteConfirmComponent } from '../manage/dialogs/dialog-delete-confirm.component';
+
 
 @Component({
   selector: 'app-document-details',
@@ -22,7 +25,7 @@ import { DialogAddTowarComponent } from './dialogs/dialog-add-towar.component';
   styleUrls: ['./document-details.component.scss']
 })
 export class DocumentDetailsComponent implements OnInit, AfterViewInit {
-  resultLength = 0;
+  resultLength: number;
   displayedColumns = ['nazwa', 'stan', 'ilosc', 'stanMag', 'uwagi', 'cena', 'akcje'];
   dataSource: DatailsTableDataSource;
   idN: string;
@@ -30,8 +33,9 @@ export class DocumentDetailsComponent implements OnInit, AfterViewInit {
   typeDoc: string;
   status: string;
   documentN: DocumentN;
-  userRole$: Observable<string>;
+  userRole: string;
   products: Product[];
+  docUserName$: Observable<string>;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -46,42 +50,58 @@ export class DocumentDetailsComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
-    // this.documentsService.getDocumentNLength().subscribe(total => this.resultLength = total);
     this.userID = this.route.parent.snapshot.params.id;
     this.getUserRole(this.userID);
     this.dataSource = new DatailsTableDataSource(this.documentsService);
     this.route.paramMap.pipe(
-      switchMap((params: ParamMap) => {
-        return this.idN = params.get('id');
-        // return this.typeDoc = params.get('type');
-      })
-    ).subscribe(() => {
+        map((params: ParamMap) => params.get('id')
+      )
+    ).subscribe((id) => {
+      this.idN = id;
+      this.paginator.pageIndex = 0;
       this.documentsService.getDocumentN(this.idN).subscribe(data => {
-        console.log(data);
+
         this.status = data.status;
         this.typeDoc = data.rodzaj_dok;
         this.documentN = data;
+        this.getDocumentNUserName(data.uzytkownik_id.toString());
       });
 
-      this.documentsService.getDocumentPLength(this.idN).subscribe(length => this.resultLength = length);
-      this.dataSource.loadDocumentsData('asc', 'nazwa', 0, 10, this.idN);
-    });
-    this.getProducts();
+      this.getDocumentPLength();
+      this.dataSource.loadDocumentsData(
+        this.sort.direction || 'asc',
+        this.sort.active || 'nazwa',
+        0,
+        this.paginator.pageSize || 10,
+        this.idN
+      );
 
+      this.getProducts();
+    });
   }
 
   getUserRole(id: string): void {
-    this.userRole$ = this.usersService.getUserRole(id);
+    this.usersService.getUserRole(id).subscribe(data => {
+      this.userRole = data;
+      if (this.userRole === 'biuro' || this.userRole === 'inni') {
+        this.displayedColumns = ['nazwa', 'stan', 'ilosc', 'uwagi', 'akcje'];
+      }
+    });
+  }
+
+  getDocumentNUserName(id: string) {
+    this.docUserName$ = this.usersService.getUserName(id);
   }
 
   ngAfterViewInit() {
+
     this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
 
     merge(this.sort.sortChange, this.paginator.page)
     .pipe(
         tap(() => this.loadDocumentsPage())
     )
-    .subscribe(data => console.log(data));
+    .subscribe();
   }
 
   loadDocumentsPage() {
@@ -97,17 +117,26 @@ export class DocumentDetailsComponent implements OnInit, AfterViewInit {
     this.productsService.getDistinctProducts(this.idN).subscribe(prod => this.products = prod);
   }
 
+  getDocumentPLength(): void {
+    this.documentsService.getDocumentPLength(this.idN).subscribe(length => this.resultLength = length);
+  }
+
   openEditDialog(row: any): void {
     const dialogRef = this.dialog.open(DialogDetailsEditComponent, {
       width: '300px',
-      data: row
+      data: {
+        row,
+        role: this.userRole
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The edit dialog was closed');
-      console.log(result);
+
       if (result && result.stan >= 0 && result.ilosc > 0) {
-        this.documentsService.updateDocumentPSingle(result).subscribe(data => console.log(data));
+        this.documentsService.updateDocumentPSingle(result).subscribe(data => {
+
+          this.loadDocumentsPage();
+        });
       }
     });
   }
@@ -118,46 +147,81 @@ export class DocumentDetailsComponent implements OnInit, AfterViewInit {
       width: '400px',
       data: {
         products: this.products,
-        documentP }
+        documentP,
+        role: this.userRole
+      }
 
     });
 
     dialogRef.afterClosed().subscribe((result: DocumentP) => {
-      console.log('The add dialog was closed');
-      console.log(result);
+
       if (result && result.stan >= 0 && result.ilosc > 0 && result.id) {
         this.documentsService.updateDocumentP(result, this.idN).subscribe(data => {
-          console.log(data);
+
+          this.getDocumentPLength();
           this.loadDocumentsPage();
+          this.getProducts();
         });
       } else if (result && !result.id) {
-       alert('Something wrong with product\'s name');
+       alert('Nie dobrze wypełniony formular! Sprobuj ponownie.');
+      }
+    });
+  }
+
+  openConfirmDialog(status: string): void {
+    let msg: string;
+    if (status === 'anulowany') {
+      msg = 'Czy napewno chcesz anulować dokument?';
+    } else {
+      msg = 'Czy dokument już jest gotowy?';
+    }
+
+    const dialogRef = this.dialog.open(DialogConfirmationComponent, {
+      disableClose: true,
+      data: msg
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.updateStatus(status);
       }
     });
   }
 
   delete(row: any): void {
-    // console.log(this.dataSource);
-    console.log(row);
     this.documentsService.deleteDocumentP(row.id).subscribe(data => {
-      console.log(data);
-      this.documentsService.getDocumentPLength(this.idN).subscribe(length => this.resultLength = length);
+      this.getDocumentPLength();
       this.loadDocumentsPage();
+      this.getProducts();
     });
 
   }
 
   makeWz(): void {
-    // TODO -> check if the document is bigger the 0
-    this.documentsService.copyToWZ(this.idN).subscribe(data => console.log(data));
-    // this.router.navigate(['/details', this.idN, 'WZ']);
+    this.documentsService.copyToWZ(this.idN).subscribe();
     this.updateStatus('zrobione wz');
   }
 
   updateStatus(status: string): void {
     this.documentsService.updateStatus(this.idN, status).subscribe(data => {
-      console.log(data);
       this.router.navigate(['../../look', this.typeDoc], { relativeTo: this.route });
+    });
+  }
+
+  print(): void {
+    window.print();
+  }
+
+  openDeleteConfirm(row: any): void {
+    const dialogRef = this.dialog.open(DialogDeleteConfirmComponent, {
+      width: '300px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.delete(row);
+      }
     });
   }
 

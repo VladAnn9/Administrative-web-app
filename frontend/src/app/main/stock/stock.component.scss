@@ -1,0 +1,25 @@
+.print-icon {
+    color: rgb(103, 103, 255);
+}
+
+.mat-icon-button {
+    transition: background .2s;
+
+    &:hover {
+        background: rgba(221, 221, 221, 0.8);
+    }
+}
+
+table {
+    width: 100%;
+
+    td {
+        padding-right: 10px;
+    }
+}
+
+@media print {
+    .mat-elevation-z8 {
+        box-shadow: none !important;
+    }
+}

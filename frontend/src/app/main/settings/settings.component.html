@@ -1,0 +1,57 @@
+<div class="row main-container">
+  <div class="col-12 col-sm-6">
+    <div class="row justify-content-center">
+      <div class="col-auto">
+        <span class="label">AKTYWNE DOKUMENTY OD:</span>
+      </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+      <div class="col-auto">
+        <mat-form-field>
+          <input
+            matInput
+            [matDatepicker]="picker1"
+            placeholder="Wybierz datę"
+            [formControl]="activeDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker1"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6">
+    <div class="row justify-content-center">
+      <div class="col-auto">
+        <span class="label">INWENTARIZACJA OD:</span>
+      </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+      <div class="col-auto">
+        <mat-form-field>
+          <input
+            matInput
+            [matDatepicker]="picker2"
+            placeholder="Wybierz datę"
+            [formControl]="inventDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker2"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-end mt-4">
+  <div class="col-auto pr-0">
+      <button mat-raised-button color="warn" class="apply-btn" (click)="openConfirmDialog()">Zastosuj</button>
+  </div>
+</div>

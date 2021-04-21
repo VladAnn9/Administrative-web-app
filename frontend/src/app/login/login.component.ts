@@ -11,9 +11,6 @@ import { User } from '../models/user';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-
-  // passwordError = 'You must enter the password';
-  // incorrectLogin = false;
   loggedIn: boolean;
   loginForm: FormGroup;
 
@@ -28,8 +25,6 @@ export class LoginComponent implements OnInit {
       name: ['', Validators.required],
       password: ['', Validators.required]
     });
-
-    console.log(this.loginForm);
   }
 
   onSubmit() {
@@ -43,7 +38,6 @@ export class LoginComponent implements OnInit {
 
       this.auth.login({ nazwa, haslo } as User)
         .subscribe((user) => {
-            console.log('DATA LOGIN USER' + JSON.stringify(user));
             this.router.navigate(['/user',  user.id ]);
           },
           err => {
@@ -53,15 +47,4 @@ export class LoginComponent implements OnInit {
         );
     }
   }
-
-
-
-
-
-  // getErrorMessage(loginError?: any) {
-  //   return this.loginForm.controls.email.hasError('required') ? 'You must enter a value' :
-  //       this.loginForm.controls.email.hasError('email') ? 'Not a valid email' :
-  //           '';
-  // }
-
 }

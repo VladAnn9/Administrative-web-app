@@ -3,7 +3,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
-import {DocumentP} from '../../../models/document_P';
 import {Product} from '../../../models/product';
 
 import { MainTablesService } from '../../../services/main-tables.service';
@@ -13,7 +12,7 @@ import { MainTablesService } from '../../../services/main-tables.service';
   templateUrl: 'dialog-add.html',
   styles: [
     '.mat-dialog-actions { justify-content: space-between; }',
-    'mat-form-field { display: block }'
+    'mat-form-field { display: block; }'
   ]
 })
 export class DialogAddComponent implements OnInit {
@@ -28,16 +27,18 @@ export class DialogAddComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA)
     public data: any
   ) {
-    console.log(this.data);
+
   }
 
   ngOnInit() {
     if (this.data.table === 'materialy') {
+      this.data.columns[this.data.columns.indexOf('grupa')] = 'grupa_id';
       this.mainTableService.getSubTableForDialogEdit('grupy').subscribe(table => {
         this.subTable = table;
         this.filterFunc();
       });
     } else if (this.data.table === 'uzytkownicy') {
+      this.data.columns[this.data.columns.indexOf('lokal')] = 'lokalizacjaId';
       this.mainTableService.getSubTableForDialogEdit('lokalizacje').subscribe(table => {
           this.subTable = table;
           this.filterFunc();
@@ -70,13 +71,10 @@ export class DialogAddComponent implements OnInit {
   }
 
   setID(value: number, col: string) {
-    console.log(value);
-    console.log(col);
     this.result[col] = value;
   }
 
   changeActive(e: any, col: string): void {
-    console.log(e.checked);
     if (e.checked) {
       this.result[col] = 1;
     } else {

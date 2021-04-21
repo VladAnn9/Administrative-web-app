@@ -16,7 +16,7 @@
         <mat-spinner></mat-spinner>
       </div>
       
-      <div class="mat-elevation-z8">
+      <div class="mat-elevation-z8" >
         <table
           mat-table
           [dataSource]="dataSource"
@@ -25,19 +25,17 @@
           matSortDirection="asc"
           matSortDisableClear
         >
-          <!-- ID Column -->
+
           <ng-container matColumnDef="nazwa">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Nazwa</th>
             <td mat-cell *matCellDef="let row">{{ row.nazwa }}</td>
           </ng-container>
-      
-          <!-- Progress Column -->
+
           <ng-container matColumnDef="grupa">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Grupa</th>
             <td mat-cell *matCellDef="let row">{{ row.grupa }}</td>
           </ng-container>
-      
-          <!-- Name Column -->
+
           <ng-container matColumnDef="uwagi">
             <th mat-header-cell *matHeaderCellDef>Uwagi</th>
             <td mat-cell *matCellDef="let row">
@@ -51,7 +49,7 @@
             </td>
           </ng-container>
       
-          <ng-container matColumnDef="stan">
+          <ng-container matColumnDef="stan" *ngIf="docType === 'Z' || docType === 'WZ' || docType === 'ZN'">
             <th
               [style.width.%]="10"
               mat-header-cell
@@ -128,18 +126,10 @@
     </div>
   </div>
 </div>
-<div *ngIf="specialProducts.length" class="row mt-4">
-  <div class="col-12">
-    <h4 class="pl-3">Unikalne towary</h4>
-    <mat-card *ngFor="let prod of specialProducts">{{prod.nazwa}}</mat-card>
-  </div>
-</div>
+
 <div class="row justify-content-between">
   <div class="col-auto mt-4">
-    <button color="warn" mat-raised-button (click)="done()">Gotowy</button>
-  </div>
-  <div class="col-auto mt-4">
-    <button mat-raised-button (click)="openDialog()">Dodaj unikalny towar</button>
+    <button color="warn" mat-raised-button (click)="openConfirmDialog()">Gotowy</button>
   </div>
 </div>
 

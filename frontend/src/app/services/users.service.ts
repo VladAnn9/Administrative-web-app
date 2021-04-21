@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -10,7 +10,7 @@ import { User } from '../models/user';
 })
 export class UsersService {
 
-    private url = 'http://localhost:3000/users';
+    private url = 'http://localhost:3000/api/users';
 
     constructor(private http: HttpClient) {}
 
@@ -18,7 +18,7 @@ export class UsersService {
         return this.http.get<User[]>(this.url);
     }
 
-    getUserName(id: number): Observable<string> {
+    getUserName(id: string): Observable<string> {
       return this.http.get<User>(`${this.url}/name/${id}`).pipe(map(data => data.nazwa));
     }
 

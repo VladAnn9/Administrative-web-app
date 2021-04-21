@@ -1,6 +1,12 @@
 .wrapper {
     width: 70%;
     margin: 0 auto;
+
+    @media (max-width: 767.98px) { 
+        & {
+            width: 100%;
+        }
+    }
 }
 
 table {
@@ -17,9 +23,18 @@ table {
         }
     }
     
-    
     td {
         padding-right: 10px;
+        outline: none;
+    }
+
+    
+    .mat-icon-button {
+        transition: background .2s;
+    
+        &:hover {
+            background: rgb(246, 246, 246);
+        }
     }
 }
 

@@ -1,19 +1,18 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { MatPaginator, MatSort } from '@angular/material';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { merge, fromEvent, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, tap, delay } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, tap, map } from 'rxjs/operators';
 import { formatDate } from '@angular/common';
-import { switchMap } from 'rxjs/operators';
 
 import {MatDialog} from '@angular/material/dialog';
-import { DialogComponent } from '../add-new/DialogComponent';
+import { DialogConfirmationComponent } from '../details/dialogs/dialog-confirm.component';
 
 import { DocumentsService } from '../../services/documents.service';
 import { UsersService } from '../../services/users.service';
 import { ProductsDataSource } from '../../services/products.datasource';
 import { ProductsService } from '../../services/products.service';
-// import { DocumentP } from '../../models/document_P';
+
 import { DocumentN } from '../../models/document_N';
 
 @Component({
@@ -22,23 +21,22 @@ import { DocumentN } from '../../models/document_N';
   styleUrls: ['./add-table.component.scss']
 })
 export class AddTableComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['nazwa', 'grupa', 'uwagi', 'stan', 'ilosc', 'cena'];
+  displayedColumns: string[];
   dataSource: ProductsDataSource;
   resultsLength = 0;
   idN: number;
-  userID: number;
+  userID: string;
   userName$: Observable<string>;
+  userRole: string;
   docType: string;
-  // @Output() saveDocument = new EventEmitter();
+
   documentN: DocumentN = new DocumentN();
 
   docDate: string;
   fillError = [];
   coloredRows = [];
-  // documentP: DocumentP[] = [];
-  // pageProducts = [];
-  specialProducts = [];
-  documentPIds = [];
+
+  documentPIds: object = {};
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -55,17 +53,25 @@ export class AddTableComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.dataSource = new ProductsDataSource(this.documentsService);
-    this.dataSource.loadProducts('', 'asc', 'nazwa', 0, 10, this.idN);
+
     this.getProductsLength();
+    this.userID = this.route.parent.snapshot.params.id;
+
 
     this.route.paramMap.pipe(
-      switchMap((params: ParamMap) => {
+      map((params: ParamMap) => {
         return this.docType = params.get('type');
       })
     ).subscribe(() => {
-      this.userID = this.route.parent.snapshot.params.id;
+      this.getUserRole();
+      this.idN = 0;
+      this.dataSource.loadProducts('', 'asc', 'nazwa', 0, 10, this.idN);
       this.setUpDocumentN();
       this.getUserName(this.userID);
+
+      this.documentPIds = {};
+      this.fillError = [];
+      this.coloredRows = [];
     });
   }
 
@@ -73,8 +79,26 @@ export class AddTableComponent implements OnInit, AfterViewInit {
     this.productsService.getProductsLength().subscribe(total => this.resultsLength = total);
   }
 
-  getUserName(id: number): void {
+  getUserName(id: string): void {
     this.userName$ = this.usersService.getUserName(id);
+  }
+
+  getUserRole(): void {
+    this.usersService.getUserRole(this.userID).subscribe(role => {
+      this.userRole = role;
+      if (this.userRole === 'biuro' || this.userRole === 'inni') {
+        this.displayedColumns = ['nazwa', 'grupa', 'uwagi', 'stan', 'ilosc'];
+        if (this.docType === 'PZ' || this.docType === 'I') {
+          this.displayedColumns = this.displayedColumns.filter(val => val !== 'stan');
+        }
+      } else {
+        this.displayedColumns = ['nazwa', 'grupa', 'uwagi', 'stan', 'ilosc', 'cena'];
+        if (this.docType === 'PZ' || this.docType === 'I') {
+          this.displayedColumns = this.displayedColumns.filter(val => val !== 'stan');
+        }
+      }
+
+    });
   }
 
   ngAfterViewInit() {
@@ -96,7 +120,7 @@ export class AddTableComponent implements OnInit, AfterViewInit {
     .pipe(
         tap(() => this.loadProductsPage())
     )
-    .subscribe(data => console.log(data));
+    .subscribe();
   }
 
   loadProductsPage() {
@@ -112,44 +136,46 @@ export class AddTableComponent implements OnInit, AfterViewInit {
   updateTable(value: string, row: any, name: string) {
     if (value.trim().length > 0 || row[name]) {
       row[name] = value;
-      // console.log(value);
 
-      if (row.stan >= 0 && row.ilosc > 0) {
-        // POST
+      if ((row.stan >= 0 && row.ilosc > 0) || ((this.docType === 'PZ' || this.docType === 'I') && Number(row.ilosc) > 0)) {
         if (this.idN) {
           this.save(row);
 
         } else {
           this.create(row);
         }
-
         this.coloredRows[row.id] = true;
         this.fillError[row.id] = false;
       } else if (row.stan && !row.ilosc || !row.stan && row.ilosc || !row.stan) {
-        // Warning
         this.fillError[row.id] = true;
-        // console.log(this.fillError);
-      } else {
-        // this.fillError[row.id] = true;
+
       }
 
       const usedRows = Object.values(row).filter(e => e);
-      if (usedRows.length <= 3) {
+      if (usedRows.length <= 3 && this.documentPIds[row.id]) {
         this.documentsService.deleteDocumentP(this.documentPIds[row.id])
-        .subscribe(data => data ? console.log(data) : '');
+        .subscribe(() => {
+          delete this.documentPIds[row.id];
+
+          if (Object.values(this.documentPIds).length === 0) {
+            this.deleteN();
+          }
+        });
 
         this.coloredRows[row.id] = false;
         this.fillError[row.id] = false;
-      }
 
-      console.log(row);
+
+      } else if (usedRows.length <= 3) {
+        this.fillError[row.id] = false;
+      }
     }
   }
 
   setUpDocumentN(): void {
-    this.docDate = formatDate(new Date(), 'yy/M/d', 'pl', 'UTC +2');
-    console.log(this.docDate);
-    this.documentN.uzytkownik_id = this.userID;
+    this.docDate = formatDate(new Date(), 'y/M/d', 'pl', 'UTC +2');
+
+    this.documentN.uzytkownik_id = Number(this.userID);
     this.documentN.data = this.docDate;
     this.documentN.rodzaj_dok = this.docType;
     if (this.docType === 'WZ' || this.docType === 'ZN') {
@@ -159,13 +185,19 @@ export class AddTableComponent implements OnInit, AfterViewInit {
     } else {
       this.documentN.mnoznik = 1;
     }
-    console.log(this.documentN);
+
+  }
+
+  deleteN(): void {
+    if (this.idN) {
+      this.documentsService.deleteDocumentN(this.idN).subscribe();
+    }
   }
 
   create(row: any): void {
     this.documentN.status = 'edycja';
     this.documentsService.addDocument(row, this.documentN).subscribe(data => {
-      console.log(data);
+
       this.idN = data.IDN;
       this.documentPIds[row.id] = data.idP;
     });
@@ -173,37 +205,27 @@ export class AddTableComponent implements OnInit, AfterViewInit {
 
   save(row: any): void {
     this.documentsService.updateDocumentP(row, this.idN).subscribe(data => {
-      console.log(data);
+
       if (data.idP) {
         this.documentPIds[row.id] = data.idP;
       }
     });
   }
 
-  done(): void {
-    this.documentN.status = 'gotowy';
-    this.documentN.id = this.idN;
-    this.documentsService.updateDocumentN(this.documentN).subscribe(data => {
-       console.log(data);
-       this.router.navigate(['../../look', this.docType], { relativeTo: this.route });
-    });
-    // this.selectedTab = 1;
-  }
-
-
-
-  openDialog(): void {
-    const dialogRef = this.dialog.open(DialogComponent, {
-      width: '300px',
-      data: {}
+  openConfirmDialog(): void {
+    const dialogRef = this.dialog.open(DialogConfirmationComponent, {
+      disableClose: true,
+      data: 'Czy dokument już jest gotowy?'
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-      console.log(result);
-      if (result && result.nazwa && result.stan >= 0 && result.ilosc > 0) {
-        this.specialProducts.push(result);
-        console.log(this.specialProducts);
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result && Object.values(this.documentPIds).length) {
+        this.documentN.status = 'gotowy';
+        this.documentN.id = this.idN;
+        this.documentsService.updateDocumentN(this.documentN).subscribe(data => {
+
+           this.router.navigate(['../../look', this.docType], { relativeTo: this.route });
+        });
       }
     });
   }

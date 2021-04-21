@@ -1,95 +1,119 @@
-<div class="row">
-  <div class="col-12">
-    <div class="spinner-container" *ngIf="dataSource.loading$ | async">
-        <mat-spinner></mat-spinner>
+<div class="row d-print-none">
+  <div class="col-12 text-right">
+    <button mat-icon-button aria-label="Print" (click)="print()">
+      <mat-icon class="print-icon">print</mat-icon>
+    </button>
+  </div>
+</div>
+<div>
+  <div class="row justify-content-center mb-4">
+    <div *ngIf="documentN" class="col-12 doc-header text-center">
+      <span>ID: {{documentN.id}}</span><span>Nazwa: {{docUserName$ | async}}</span>
+      <span>Dokument: {{typeDoc}}</span><span>Status: {{status}}</span>
+      <span>Data: {{documentN.data | date: 'y/M/d'}}</span>
     </div>
-    
-    <div class="wrapper mat-elevation-z8">
-      <table
-        mat-table
-        [dataSource]="dataSource"
-        matSort
-        matSortActive="nazwa"
-        matSortDirection="asc"
-        matSortDisableClear
-      >
+  </div>
+  <div id="table" class="row">
+    <div class="col-12">
+      <div class="spinner-container" *ngIf="(dataSource.loading$ | async)">
+          <mat-spinner></mat-spinner>
+      </div>
       
-        <ng-container matColumnDef="nazwa">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nazwa</th>
-          <td mat-cell *matCellDef="let row">{{ row.nazwa }}</td>
-        </ng-container>
- 
-        <ng-container matColumnDef="ilosc">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Iłość</th>
-          <td mat-cell *matCellDef="let row">{{row.ilosc}}</td>
-        </ng-container>
+      <div class="mat-elevation-z8">
+        <table 
+          mat-table
+          [dataSource]="dataSource"
+          matSort
+          matSortActive="nazwa"
+          matSortDirection="asc"
+          matSortDisableClear
+        >
+        
+          <ng-container matColumnDef="nazwa">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nazwa</th>
+            <td mat-cell *matCellDef="let row">{{ row.nazwa }}</td>
+          </ng-container>
+   
+          <ng-container matColumnDef="ilosc">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Ilość</th>
+            <td mat-cell *matCellDef="let row">{{row.ilosc}}</td>
+          </ng-container>
+        
+          <ng-container matColumnDef="stan">
+            <th mat-header-cell
+              *matHeaderCellDef mat-sort-header
+            >Stan</th>
+            <td mat-cell *matCellDef="let row">{{row.stan}}</td>
+          </ng-container>
       
-        <ng-container matColumnDef="stan">
-          <th mat-header-cell
-            *matHeaderCellDef mat-sort-header
-          >Stan</th>
-          <td mat-cell *matCellDef="let row">{{row.stan}}</td>
-        </ng-container>
-    
-        <ng-container matColumnDef="stanMag">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Stan Magazynu</th>
-            <td mat-cell *matCellDef="let row">{{row.stanMag}}</td>
-        </ng-container>
-    
-        <ng-container matColumnDef="uwagi">
-            <th mat-header-cell *matHeaderCellDef>Uwagi</th>
-            <td mat-cell *matCellDef="let row">{{row.uwagi}}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="cena">
-            <th mat-header-cell *matHeaderCellDef>Cena</th>
-            <td mat-cell *matCellDef="let row">{{row.cena}}</td>
-        </ng-container>
-    
-        <ng-container matColumnDef="akcje">
-            <th mat-header-cell *matHeaderCellDef>Akcje</th>
-            <td mat-cell *matCellDef="let row">
-              <ng-container *ngIf="(userRole$ | async) === 'inni' || (userRole$ | async) === 'biuro'; then thenBlock; else elseBlock">
+          <ng-container matColumnDef="stanMag">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Stan Magazynu</th>
+              <td mat-cell *matCellDef="let row" 
+                [style.background]="(row.stanMag !== null) && (row.ilosc_alarm > row.stanMag) ? '#ff7961' : '#ffffff'"
+                >{{row.stanMag}}</td>
+          </ng-container>
+      
+          <ng-container matColumnDef="uwagi">
+              <th mat-header-cell *matHeaderCellDef>Uwagi</th>
+              <td mat-cell *matCellDef="let row">{{row.uwagi}}</td>
+          </ng-container>
+  
+          <ng-container matColumnDef="cena">
+              <th mat-header-cell *matHeaderCellDef>Cena</th>
+              <td mat-cell *matCellDef="let row">{{row.cena}}</td>
+          </ng-container>
+      
+          <ng-container matColumnDef="akcje">
+            <th mat-header-cell *matHeaderCellDef class="d-print-none">Akcje</th>
+            <td mat-cell *matCellDef="let row" class="d-print-none">
+              <ng-container *ngIf="userRole === 'inni' || userRole === 'biuro'; then thenBlock; else elseBlock">
               </ng-container>
               <ng-template #thenBlock >
-                <button mat-icon-button [disabled]="status !== 'edycja' || typeDoc === 'WZ'" color="accent"><mat-icon 
-                  (click)="(status === 'edycja' && typeDoc !== 'WZ') ? openEditDialog(row) : ''">edit</mat-icon></button>
-                <button mat-icon-button [disabled]="status !== 'edycja' || typeDoc === 'WZ'"
+                <button mat-icon-button 
+                [disabled]="status !== 'edycja' || typeDoc === 'WZ' || userRole === 'inni'" color="accent"><mat-icon 
+                  (click)="(status === 'edycja' && typeDoc !== 'WZ' && userRole !== 'inni') ? openEditDialog(row) : ''">edit</mat-icon></button>
+                <button mat-icon-button 
+                  [disabled]="status !== 'edycja' || typeDoc === 'WZ' || userRole === 'inni'"
                   color="warn"><mat-icon 
-                  (click)="(status === 'edycja' && typeDoc !== 'WZ') ? delete(row) : ''">close</mat-icon></button>
+                  (click)="(status === 'edycja' && typeDoc !== 'WZ' && userRole !== 'inni') ? openDeleteConfirm(row) : ''">close</mat-icon></button>
               </ng-template>
               <ng-template #elseBlock>
                 <button mat-icon-button color="accent" (click)="openEditDialog(row)"><mat-icon>edit</mat-icon></button>
                 <button mat-icon-button
-                  color="warn" (click)="delete(row)"><mat-icon >close</mat-icon></button>
+                  color="warn" (click)="openDeleteConfirm(row)"><mat-icon >close</mat-icon></button>
               </ng-template>
             </td>
-        </ng-container>
-      
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      
-      </table>
-      <mat-paginator
-      color="accent"
-      [length]="resultLength"
-      [pageSize]="10"
-      [pageSizeOptions]="[5, 10, 25, 100]"  
-      ></mat-paginator>
+          </ng-container>
+        
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        
+        </table>
+        <mat-paginator class="d-print-none"
+        color="accent"
+        [length]="resultLength"
+        [pageSize]="10"
+        [pageSizeOptions]="[5, 10, 25, 100]"  
+        ></mat-paginator>
+      </div>
     </div>
   </div>
+
 </div>
 
-<ng-template *ngIf="((userRole$ | async) === 'root' || (userRole$ | async) === 'admin'); then thenBlockBtns;
+<ng-template *ngIf="(userRole === 'root' || userRole === 'admin'); then thenBlockBtns;
   else elseBlockBtns" ></ng-template>
 <ng-template #thenBlockBtns>
-  <div class="row justify-content-between">
-    <div class="col-auto">
-      <div *ngIf="status !== 'zrobione wz'" class="d-inline-flex mt-4 mr-3">
+  <div class="row justify-content-between d-print-none">
+    <div class="col-auto mt-4">
+      <div *ngIf="status !== 'anulowany'" class="d-inline-flex mr-3">
+        <button mat-raised-button color="warn" (click)="openConfirmDialog('anulowany')">Anuluj dokument</button>
+      </div>
+      <div *ngIf="status !== 'zrobione wz'" class="d-inline-flex mr-3">
         <button mat-raised-button *ngIf="typeDoc === 'Z'" color="accent" (click)="makeWz()">Rób WZ</button>
       </div>
-      <div *ngIf="status === 'edycja'" class="d-inline-flex mt-4">
-        <button mat-raised-button color="warn" (click)="updateStatus('gotowy')">Gotowy</button>
+      <div *ngIf="status === 'edycja'" class="d-inline-flex">
+        <button mat-raised-button color="accent" (click)="openConfirmDialog('gotowy')">Gotowy</button>
       </div>
     </div>
     <div class="col-auto">
@@ -99,14 +123,16 @@
     </div>
   </div>
 </ng-template>
+
 <ng-template #elseBlockBtns>
-  <div *ngIf="status === 'edycja' && typeDoc !== 'WZ'" class="row justify-content-between">
+  <div *ngIf="status === 'edycja' && typeDoc !== 'WZ' && userRole !== 'inni'" 
+    class="row justify-content-between d-print-none">
     <div class="col-auto">
       <div class="d-inline-flex mt-4">
-        <button mat-raised-button color="warn" (click)="updateStatus('gotowy')">Gotowy</button>
+        <button mat-raised-button color="accent" (click)="openConfirmDialog('gotowy')">Gotowy</button>
       </div>
     </div>
-    <div  class="col-auto">
+    <div class="col-auto">
         <div class="mt-4">
           <button mat-raised-button (click)="openAddTowarDialog()">Dodaj Towar</button>
         </div>

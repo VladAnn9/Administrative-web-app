@@ -23,9 +23,8 @@ export class DialogAddTowarComponent implements OnInit {
     filteredProducts: Observable<Product[]>;
   constructor(public dialogRef: MatDialogRef<DialogAddTowarComponent>,
               @Inject(MAT_DIALOG_DATA)
-    public data: object
+    public data: any
     ) {
-        console.log(this.data);
     }
 
     ngOnInit() {
@@ -45,7 +44,6 @@ export class DialogAddTowarComponent implements OnInit {
     findID(value: string) {
         // tslint:disable-next-line: no-string-literal
         this.documentP.id = this.data['products'].find((p: Product) => p.nazwa === value).id;
-        console.log(this.documentP);
     }
 
   onNoClick(): void {

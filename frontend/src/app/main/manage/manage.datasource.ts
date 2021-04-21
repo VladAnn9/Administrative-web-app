@@ -2,8 +2,6 @@ import {CollectionViewer, DataSource} from '@angular/cdk/collections';
 import {Observable, BehaviorSubject, of} from 'rxjs';
 import { MainTablesService } from '../../services/main-tables.service';
 import {catchError, finalize} from 'rxjs/operators';
-import {DocumentP} from '../../models/document_P';
-
 
 export class ManageDataSource implements DataSource<object> {
 
@@ -13,19 +11,19 @@ export class ManageDataSource implements DataSource<object> {
 
     public loading$ = this.loadingSubject.asObservable();
 
-    constructor(private documentsService: MainTablesService) {
+    constructor(private mainTableService: MainTablesService) {
 
     }
 
     loadManageData(sortDirection: string,
                    sortActive: string,
                    pageIndex: number,
-                   pageSize: number, table: string) {
+                   pageSize: number, table: string,  userID: string) {
 
         this.loadingSubject.next(true);
 
-        this.documentsService.findManageData(sortDirection, sortActive,
-            pageIndex, pageSize, table).pipe(
+        this.mainTableService.findManageData(sortDirection, sortActive,
+            pageIndex, pageSize, table, userID).pipe(
                 catchError(() => of([])),
                 finalize(() => this.loadingSubject.next(false))
             )

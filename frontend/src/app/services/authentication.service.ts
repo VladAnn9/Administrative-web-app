@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 import { User } from '../models/user';
@@ -18,7 +18,7 @@ export class AuthenticationService {
     private token: string;
     private role: string;
 
-    private url = 'http://localhost:3000/';
+    private url = 'http://localhost:3000/api/';
 
     constructor(private http: HttpClient, private router: Router) {}
 
@@ -39,13 +39,11 @@ export class AuthenticationService {
     login(user: User): Observable<any> {
         return this.http.post<any>(`${this.url}login`, user, httpOptions).pipe(
             map(data => {
-                console.log(data);
                 if (data && data.token) {
                     localStorage.setItem('userToken', data.token);
                     localStorage.setItem('role', data.uprawnienie);
                     this.token = data.token;
                     this.role = data.uprawnienie;
-                    console.log(this.role);
                 }
                 return data;
             })
@@ -56,7 +54,6 @@ export class AuthenticationService {
         return this.http.get<User>(`${this.url}users/user/authenticate`, {
             headers: { Authorization: `${this.getToken()}` }
         }).pipe(data => {
-            console.log(data);
             return data;
         });
     }

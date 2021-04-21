@@ -1,17 +1,16 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { map } from 'rxjs/operators';
 import { MatPaginator, MatSort } from '@angular/material';
-import { merge, fromEvent, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, tap, delay } from 'rxjs/operators';
+import { merge, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 
 import { MainTablesService } from '../../services/main-tables.service';
-// import { DocumentP } from '../../models/document_P';
-import { User } from '../../models/user';
 import { ManageDataSource } from './manage.datasource';
 import { DialogMainEditComponent } from './dialogs/dialog-main-edit.component';
 import { DialogAddComponent } from './dialogs/dialog-add.component';
+import { DialogDeleteConfirmComponent } from './dialogs/dialog-delete-confirm.component';
 
 @Component({
   selector: 'app-manage',
@@ -20,29 +19,29 @@ import { DialogAddComponent } from './dialogs/dialog-add.component';
 })
 export class ManageComponent implements OnInit, AfterViewInit {
   resultLength = 0;
-  displayedColumns: string[];
-  // ['id', 'nazwa', 'haslo', 'uprawnienie', 'lokalizacjaId', 'aktywny'];
+  displayedColumns: string[] = [];
   dataSource: ManageDataSource;
   kindOfTable: string;
   columnsForAddDialog: any;
+  currentUserID: string;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private tablesService: MainTablesService,
     private dialog: MatDialog
   ) { }
 
   ngOnInit() {
+    this.currentUserID = this.route.snapshot.parent.params.id;
     this.dataSource = new ManageDataSource(this.tablesService);
     this.route.paramMap.pipe(
-      switchMap((params: ParamMap) => this.kindOfTable = params.get('kind'))
+      map((params: ParamMap) => this.kindOfTable = params.get('kind'))
     ).subscribe(() => {
-
-      // create forkJoin function
+      this.paginator.pageIndex = 0;
+      // fork Join
       this.tablesService.getLength(this.kindOfTable).subscribe(total => {
         this.resultLength = total;
         this.tablesService.getColumnsList(this.kindOfTable).subscribe(columns => {
@@ -56,11 +55,12 @@ export class ManageComponent implements OnInit, AfterViewInit {
             this.sort.active,
             this.paginator.pageIndex,
             this.paginator.pageSize,
-            this.kindOfTable);
+            this.kindOfTable,
+            this.currentUserID
+          );
         });
       });
     });
-
   }
 
   ngAfterViewInit() {
@@ -70,7 +70,7 @@ export class ManageComponent implements OnInit, AfterViewInit {
     .pipe(
         tap(() => this.loadTablePage())
     )
-    .subscribe(data => console.log(data));
+    .subscribe();
   }
 
   loadTablePage() {
@@ -79,14 +79,13 @@ export class ManageComponent implements OnInit, AfterViewInit {
       this.sort.active,
       this.paginator.pageIndex,
       this.paginator.pageSize,
-      this.kindOfTable);
+      this.kindOfTable,
+      this.currentUserID
+    );
   }
 
   delete(row: any): void {
-    console.log(row);
-
     this.tablesService.deleteMainTable(row.id, this.kindOfTable).subscribe(data => {
-      console.log(data);
       this.tablesService.getLength(this.kindOfTable).subscribe(total => this.resultLength = total);
       this.loadTablePage();
     });
@@ -94,7 +93,6 @@ export class ManageComponent implements OnInit, AfterViewInit {
   }
 
   openEditDialog(row: any): void {
-    console.log(row);
     const dialogRef = this.dialog.open(DialogMainEditComponent, {
       width: '350px',
       data: {
@@ -104,21 +102,19 @@ export class ManageComponent implements OnInit, AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The edit dialog was closed');
-      console.log(result);
+
 
       if (result && result.nazwa && !isNaN(Number(result.ilosc_alarm))) {
         this.tablesService.updateMainTable(result, this.kindOfTable).subscribe(data => {
-          console.log(data);
           this.loadTablePage();
         });
       } else if (result && result.nazwa && !result.ilosc_alarm) {
         this.tablesService.updateMainTable(result, this.kindOfTable).subscribe(data => {
-          console.log(data);
           this.loadTablePage();
         });
+      } else {
+        this.loadTablePage();
       }
-      this.loadTablePage();
     });
   }
 
@@ -130,13 +126,11 @@ export class ManageComponent implements OnInit, AfterViewInit {
         columns: this.columnsForAddDialog,
         table: this.kindOfTable
       }
-
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The add dialog was closed');
-      console.log(result);
-      let serverRespond: any;
+
+      let serverRespond: Observable<any>;
       if (result && (this.kindOfTable === 'materialy' || this.kindOfTable === 'uzytkownicy')) {
         if (result.grupa_id || result.lokalizacjaId) {
 
@@ -155,9 +149,24 @@ export class ManageComponent implements OnInit, AfterViewInit {
       }
       if (serverRespond) {
         serverRespond.subscribe((data: any) => {
-          console.log(data);
+          if (data) { alert(data); }
+
+          this.tablesService.getLength(this.kindOfTable).subscribe(total => this.resultLength = total);
           this.loadTablePage();
         });
+      }
+    });
+  }
+
+  openDeleteConfirm(row: any): void {
+    const dialogRef = this.dialog.open(DialogDeleteConfirmComponent, {
+      width: '300px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.delete(row);
       }
     });
   }

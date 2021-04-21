@@ -13,7 +13,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 export class DialogDetailsEditComponent {
   constructor(public dialogRef: MatDialogRef<DialogDetailsEditComponent>,
               @Inject(MAT_DIALOG_DATA)
-    public data: object) { }
+    public data: any) { }
 
   onNoClick(): void {
     this.dialogRef.close();

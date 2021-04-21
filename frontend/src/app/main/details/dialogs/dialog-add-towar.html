@@ -18,11 +18,11 @@
   <mat-form-field>
     <input matInput type="text" placeholder="Uwagi" [(ngModel)]="documentP.uwagi">
   </mat-form-field>
-  <mat-form-field>
+  <mat-form-field *ngIf="data.role === 'admin' || data.role === 'root'">
     <input matInput type="number" placeholder="Cena" [(ngModel)]="documentP.cena">
   </mat-form-field>
 </div>
 <div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">Cofnij</button>
-  <button mat-button [mat-dialog-close]="documentP" cdkFocusInitial>Ok</button>
+  <button mat-button (click)="onNoClick()">Anuluj</button>
+  <button mat-button [mat-dialog-close]="documentP" cdkFocusInitial>Dodaj</button>
 </div>

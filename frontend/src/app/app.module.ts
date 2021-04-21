@@ -12,14 +12,14 @@ import { MaterialModule } from './material';
 import {MatPaginatorIntl} from '@angular/material';
 import { LoginComponent } from './login/login.component';
 
-
-import { AuthGuard } from './services/auth-guard.service';
 import { AuthRoleGuard } from './services/auth-role-guard.service';
-import { DialogComponent } from './main/add-new/DialogComponent';
 import { DialogDetailsEditComponent } from './main/details/dialogs/dialog-details-edit.component';
 import { DialogAddTowarComponent } from './main/details/dialogs/dialog-add-towar.component';
+import { DialogConfirmationComponent } from './main/details/dialogs/dialog-confirm.component';
 import { DialogMainEditComponent } from './main/manage/dialogs/dialog-main-edit.component';
 import { DialogAddComponent } from './main/manage/dialogs/dialog-add.component';
+import { DialogDeleteConfirmComponent } from './main/manage/dialogs/dialog-delete-confirm.component';
+import { DialogConfirmationSettingsComponent } from './main/settings/dialog-confirm-settings.component';
 
 registerLocaleData(localePl, 'pl');
 
@@ -29,7 +29,6 @@ function getPolishPaginatorIntl() {
   paginatorIntl.itemsPerPageLabel = 'Elementy na stronie:';
   paginatorIntl.nextPageLabel = 'Następna strona';
   paginatorIntl.previousPageLabel = 'Poprzednia strona';
-  // paginatorIntl.getRangeLabel = dutchRangeLabel;
 
   return paginatorIntl;
 }
@@ -38,18 +37,22 @@ function getPolishPaginatorIntl() {
   declarations: [
     AppComponent,
     LoginComponent,
-    DialogComponent,
     DialogDetailsEditComponent,
     DialogAddTowarComponent,
     DialogMainEditComponent,
-    DialogAddComponent
+    DialogAddComponent,
+    DialogConfirmationComponent,
+    DialogConfirmationSettingsComponent,
+    DialogDeleteConfirmComponent
   ],
   entryComponents: [
-    DialogComponent,
     DialogDetailsEditComponent,
     DialogAddTowarComponent,
     DialogMainEditComponent,
-    DialogAddComponent
+    DialogAddComponent,
+    DialogConfirmationComponent,
+    DialogConfirmationSettingsComponent,
+    DialogDeleteConfirmComponent
   ],
   imports: [
     BrowserModule,
@@ -60,7 +63,7 @@ function getPolishPaginatorIntl() {
     FormsModule,
     ReactiveFormsModule,
   ],
-  providers: [AuthGuard, AuthRoleGuard,
+  providers: [ AuthRoleGuard,
     { provide: MatPaginatorIntl, useValue: getPolishPaginatorIntl() }
   ],
   bootstrap: [AppComponent]

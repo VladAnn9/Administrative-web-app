@@ -1,104 +1,72 @@
-<nav>
-  <mat-toolbar *ngIf="currentUser">
-    <span>
-      <a href="/root"><img matTooltip="Home" class="logo" src="../../assets/logo.png" alt="home"></a>
-    </span>
-    <span>
-      <button mat-button [matMenuTriggerFor]="documents">Dokumenty</button>
+<mat-toolbar *ngIf="currentUser" class="d-print-none">
+  <span>
+    <a [routerLink]="['/user', currentUser.id]">
+      <img matTooltip="Home" class="logo" src="../../../assets/logo.png" alt="home">
+    </a>
+  </span>
+  <span>
+    <button mat-button [matMenuTriggerFor]="documents">Dokumenty</button>
 
-      <mat-menu #documents="matMenu">
-          <button mat-menu-item [matMenuTriggerFor]="zamowienia">Zamówienia (Z)</button>
-          <button *ngIf="role === 'root' || role === 'admin'" 
-            mat-menu-item [matMenuTriggerFor]="przyjecia">Przyjęcia (PZ)</button>
-          <button mat-menu-item [matMenuTriggerFor]="wydania">Wydania (WZ)</button>
-          <button mat-menu-item [matMenuTriggerFor]="inwentaryzacja">Inwentaryzacje (I)</button>
-          <button *ngIf="role !== 'inni'"
-            mat-menu-item [matMenuTriggerFor]="zniszczenia">Zniszczenia (ZN)</button>
-      </mat-menu>
+    <mat-menu #documents="matMenu">
+      <button mat-menu-item [matMenuTriggerFor]="zamowienia">Zamówienia (Z)</button>
+      <button *ngIf="role === 'root' || role === 'admin'" 
+        mat-menu-item [matMenuTriggerFor]="przyjecia">Przyjęcia (PZ)</button>
+      <button mat-menu-item [matMenuTriggerFor]="wydania">Wydania (WZ)</button>
+      <button mat-menu-item [matMenuTriggerFor]="inwentaryzacja">Inwentaryzacje (I)</button>
+      <button *ngIf="role !== 'inni'"
+        mat-menu-item [matMenuTriggerFor]="zniszczenia">Zniszczenia (ZN)</button>
+    </mat-menu>
 
-      <mat-menu #zamowienia="matMenu">
-          <button mat-menu-item [routerLink]="['./look', 'Z']">Przeglądanie</button>
-          <button *ngIf="role !== 'inni'"
-            mat-menu-item [routerLink]="['./add-new', 'Z']">Nowe zamówienie</button>
-      </mat-menu>
+    <mat-menu #zamowienia="matMenu">
+      <button mat-menu-item [routerLink]="['./look', 'Z']">Przeglądanie</button>
+      <button *ngIf="role !== 'inni'"
+        mat-menu-item (click)="getRoute('Z')">Nowe zamówienie</button>
+    </mat-menu>
 
-      <mat-menu #przyjecia="matMenu">
-          <button mat-menu-item [routerLink]="['./look', 'PZ']">Przeglądanie</button>
-          <button mat-menu-item [routerLink]="['./add-new', 'PZ']">Nowe przyjęcie</button>
-      </mat-menu>
+    <mat-menu #przyjecia="matMenu">
+      <button mat-menu-item [routerLink]="['./look', 'PZ']">Przeglądanie</button>
+      <button mat-menu-item [routerLink]="['./add-new', 'PZ']">Nowe przyjęcie</button>
+    </mat-menu>
 
-      <mat-menu #wydania="matMenu">
-          <button mat-menu-item [routerLink]="['./look', 'WZ']">Przeglądanie</button>
-          <button *ngIf="role === 'root' || role === 'admin'" 
-            mat-menu-item [routerLink]="['./add-new', 'WZ']">Nowe wydanie</button>
-      </mat-menu>
-      <mat-menu #inwentaryzacja="matMenu">
-          <button mat-menu-item [routerLink]="['./look', 'I']">Przeglądanie</button>
-          <button *ngIf="role !== 'inni'"
-            mat-menu-item [routerLink]="['./add-new', 'I']">Nowa inwentaryzacja</button>
-      </mat-menu>
-      <mat-menu #zniszczenia="matMenu">
-          <button mat-menu-item [routerLink]="['./look', 'ZN']">Przeglądanie</button>
-          <button mat-menu-item [routerLink]="['./add-new', 'ZN']">Nowe zniszczenie</button>
-      </mat-menu>
-    </span>
-    <span *ngIf="role === 'root' || role === 'admin'">
-      <button mat-button [matMenuTriggerFor]="tabels">Tabele</button>
+    <mat-menu #wydania="matMenu">
+      <button mat-menu-item [routerLink]="['./look', 'WZ']">Przeglądanie</button>
+      <button *ngIf="role === 'root' || role === 'admin'" 
+        mat-menu-item [routerLink]="['./add-new', 'WZ']">Nowe wydanie</button>
+    </mat-menu>
+    <mat-menu #inwentaryzacja="matMenu">
+      <button mat-menu-item [routerLink]="['./look', 'I']">Przeglądanie</button>
+      <button *ngIf="role !== 'inni'"
+        mat-menu-item (click)="getRoute('I')">Nowa inwentaryzacja</button>
+    </mat-menu>
+    <mat-menu #zniszczenia="matMenu">
+      <button mat-menu-item [routerLink]="['./look', 'ZN']">Przeglądanie</button>
+      <button mat-menu-item (click)="getRoute('ZN')">Nowe zniszczenie</button>
+    </mat-menu>
+  </span>
+  <span *ngIf="role === 'root' || role === 'admin'">
+    <button mat-button [matMenuTriggerFor]="tabels">Tabele</button>
 
-      <mat-menu #tabels="matMenu">
-          <button mat-menu-item [routerLink]="['./manage', 'uzytkownicy']">Użytkownicy</button>
-          <button mat-menu-item [routerLink]="['./manage', 'materialy']">Materialy</button>
-          <button mat-menu-item [routerLink]="['./manage', 'grupy']">Grupy</button>
-          <button mat-menu-item [routerLink]="['./manage', 'lokalizacje']">Lokalizacje</button>
-      </mat-menu>
-    </span>
-    <span class="heading-spacer"></span>
-    <span class="logged">W systemie jako <span matTooltip="Przejdż do profilu">{{currentUser.nazwa}}</span></span>
-    <mat-icon matTooltip="Wyloguj" class="md-light" aria-label="Logout" (click)="logout()">exit_to_app</mat-icon>
-  </mat-toolbar>
-</nav>
+    <mat-menu #tabels="matMenu">
+      <button mat-menu-item [routerLink]="['./manage', 'uzytkownicy']">Użytkownicy</button>
+      <button mat-menu-item [routerLink]="['./manage', 'materialy']">Materiały</button>
+      <button mat-menu-item [routerLink]="['./manage', 'grupy']">Grupy</button>
+      <button mat-menu-item [routerLink]="['./manage', 'lokalizacje']">Lokalizacje</button>
+      <button class="d-block d-lg-none" mat-menu-item [routerLink]="['./stan']">Stan Magazynu</button>
+    </mat-menu>
+  </span>
+  <span *ngIf="role === 'root' || role === 'admin'" class="d-none d-lg-inline">
+    <button mat-button [routerLink]="['./stan']">Stan Magazynu</button>
+  </span>
+  <span class="heading-spacer"></span>
+  <span class="logged d-none d-sm-inline">W systemie jako <span>{{currentUser.nazwa}} &ndash; {{currentUser.location}}</span></span>
+  <mat-icon *ngIf="role === 'root'" matTooltip="Ustawienia" aria-label="Settings" routerLink="./settings">settings</mat-icon>
+  <mat-icon matTooltip="Wyloguj" class="md-light" aria-label="Logout" (click)="logout()">exit_to_app</mat-icon>
+</mat-toolbar>
 
-<div *ngIf="currentUser" class="background-root">
+
+<div class="background-root">
   <div class="container">
-    <mat-tab-group [selectedIndex]="selectedTab" 
-                  (selectedIndexChange)="selectedTab = $event"
-                  mat-stretch-tabs dynamicHeight color="warn">
-      <mat-tab *ngIf="role !== 'inni'" label="Dodaj">
-        <div class="tab">
-          <a mat-raised-button (click)="getRoute('Z')">Zamówienia (Z)</a>
-          <a mat-raised-button 
-            *ngIf="role === 'root' || role === 'admin'"
-            [routerLink]="['./add-new', 'PZ']">Przyjęcia (PZ)</a>
-          <a mat-raised-button 
-            *ngIf="role === 'root' || role === 'admin'"
-            [routerLink]="['./add-new', 'WZ']">Wydania (WZ)</a>
-          <a mat-raised-button (click)="getRoute('I')">Inwentaryzacje (I)</a>
-          <a mat-raised-button 
-            *ngIf="role !== 'inni'" (click)="getRoute('ZN')"> Zniszczenia (ZN)</a>
-        </div>
-      </mat-tab>
-      <mat-tab label="Przeglądaj">
-        <div class="tab">
-          <a mat-raised-button [routerLink]="['./look', 'Z']">Zamówienia (Z)</a>
-          <a mat-raised-button *ngIf="role === 'root' || role === 'admin'" [routerLink]="['./look', 'PZ']">Przyjęcia (PZ)</a>
-          <a mat-raised-button [routerLink]="['./look', 'WZ']">Wydania (WZ)</a>
-          <a mat-raised-button [routerLink]="['./look', 'I']">Inwentaryzacje (I)</a>
-          <a mat-raised-button *ngIf="role !== 'inni'" [routerLink]="['./look', 'ZN']"> Zniszczenia (ZN)</a>
-        </div>
-      </mat-tab>
-      <mat-tab *ngIf="role === 'root' || role === 'admin'" label="Zarządzaj">
-        <div class="tab">
-          <a mat-raised-button [routerLink]="['./manage', 'uzytkownicy']">Użytkownicy</a>
-          <a mat-raised-button [routerLink]="['./manage', 'materialy']">Materialy</a>
-          <a mat-raised-button [routerLink]="['./manage', 'grupy']">Grupy</a>
-          <a mat-raised-button [routerLink]="['./manage', 'lokalizacje']">Lokalizacje</a>
-        </div>
-      </mat-tab>
-    </mat-tab-group>
-    
-
     <router-outlet></router-outlet>
-    
-    
+
   </div>
 </div>

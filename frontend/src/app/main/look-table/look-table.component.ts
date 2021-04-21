@@ -1,13 +1,14 @@
-import { Component, OnInit, AfterViewInit, ViewChild, Input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatPaginator, MatSort } from '@angular/material';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { merge, fromEvent } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, tap, delay } from 'rxjs/operators';
-import { switchMap } from 'rxjs/operators';
+import { merge } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
+import {MatDialog} from '@angular/material/dialog';
 
 import { DocumentsService } from '../../services/documents.service';
-import { DocumentN } from '../../models/document_N';
 import { LookTableDataSource } from '../../services/look.datasource';
+import { UsersService } from '../../services/users.service';
+import { DialogDeleteConfirmComponent } from '../manage/dialogs/dialog-delete-confirm.component';
 
 @Component({
   selector: 'app-look-table',
@@ -16,31 +17,45 @@ import { LookTableDataSource } from '../../services/look.datasource';
 })
 export class LookTableComponent implements OnInit, AfterViewInit {
   resultLength = 0;
-  displayedLookColumns = ['id', 'data', 'lokal', 'status'];
+  displayedLookColumns = ['id', 'data', 'lokal', 'status', 'akcje'];
   dataSourceLookTable: LookTableDataSource;
   typeOfDoc: string;
   currentUserID: string;
+  userRole: string;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
   constructor(
     private documentsService: DocumentsService,
+    private usersService: UsersService,
     private route: ActivatedRoute,
-    public router: Router
+    public router: Router,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit() {
     this.currentUserID = this.route.snapshot.parent.params.id;
+    this.usersService.getUserRole(this.currentUserID).subscribe(role => this.userRole = role);
+
     this.route.paramMap.pipe(
-      switchMap((params: ParamMap) => {
-        return this.typeOfDoc = params.get('type');
+      map((params: ParamMap) => {
+        this.typeOfDoc = params.get('type');
+        return this.typeOfDoc;
       })
     ).subscribe(() => {
-      this.documentsService.getDocumentNLength(this.typeOfDoc, this.currentUserID).subscribe(total => this.resultLength = total);
+      this.paginator.pageIndex = 0;
+      this.documentsService.getDocumentNLength(this.typeOfDoc, this.currentUserID)
+        .subscribe(total => this.resultLength = total);
       this.dataSourceLookTable = new LookTableDataSource(this.documentsService);
-      this.dataSourceLookTable.loadManageData('desc', 'data', 0, 10, this.typeOfDoc, this.currentUserID);
-      console.log(this.typeOfDoc);
+      this.dataSourceLookTable.loadManageData(
+        this.sort.direction || 'desc',
+        this.sort.active || 'id',
+        0,
+        this.paginator.pageSize || 10,
+        this.typeOfDoc,
+        this.currentUserID
+        );
     });
   }
 
@@ -51,7 +66,7 @@ export class LookTableComponent implements OnInit, AfterViewInit {
     .pipe(
         tap(() => this.loadProductsPage())
     )
-    .subscribe(data => console.log(data));
+    .subscribe();
   }
 
   loadProductsPage() {
@@ -64,9 +79,23 @@ export class LookTableComponent implements OnInit, AfterViewInit {
       this.currentUserID);
   }
 
-  details(row: any) {
-    console.log(row);
-    // this.router.navigate(['../details', row], { relativeTo: this.route });
+  delete(row: any): void {
+    this.documentsService.deleteDocumentN(row.id).subscribe(data => {
+      this.documentsService.getDocumentNLength(this.typeOfDoc, this.currentUserID).subscribe(length => this.resultLength = length);
+      this.loadProductsPage();
+    });
   }
 
+  openDeleteConfirm(row: any): void {
+    const dialogRef = this.dialog.open(DialogDeleteConfirmComponent, {
+      width: '300px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.delete(row);
+      }
+    });
+  }
 }

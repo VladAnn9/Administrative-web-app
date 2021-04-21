@@ -35,20 +35,17 @@ export class DialogMainEditComponent implements OnInit {
   ngOnInit() {
     if (this.data.table === 'materialy') {
       this.mainTableService.getSubTableForDialogEdit('grupy').subscribe(table => {
-        this.data.row.grupa_id = table.find(el => el.id === this.data.row.grupa_id).id;
+        this.data.row.grupa_id = table.find(el => el.nazwa === this.data.row.grupa).id;
         this.formControl.setValue(this.data.row.grupa_id);
         this.subTable = table;
         this.filterFunc();
-        // console.log(this.subTable);
       });
     } else if (this.data.table === 'uzytkownicy') {
       this.mainTableService.getSubTableForDialogEdit('lokalizacje').subscribe(table => {
-        if (this.data.row.lokalizacjaId) { // delete this If
-          this.data.row.lokalizacjaId = table.find(el => el.id === this.data.row.lokalizacjaId).id;
+          this.data.row.lokalizacjaId = table.find(el => el.nazwa === this.data.row.lokal).id;
           this.formControl.setValue(this.data.row.lokalizacjaId);
-        }
-        this.subTable = table;
-        this.filterFunc();
+          this.subTable = table;
+          this.filterFunc();
       });
     } else {
       this.subTable = null;

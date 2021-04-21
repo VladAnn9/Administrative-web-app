@@ -1,18 +1,29 @@
+.doc-header {
+    & > span {
+        margin-right: 16px;
+    }
+}
+
+.print-icon {
+    color: rgb(103, 103, 255);
+}
+
+.mat-icon-button {
+    transition: background .2s;
+
+    &:hover {
+        background: rgba(221, 221, 221, 0.8);
+    }
+}
+
+@media print {
+    .mat-elevation-z8 {
+        box-shadow: none !important;
+    }
+}
 
 table {
-    width: 100%;
-
-    // /deep/ tbody {
-    //     tr {
-    //         cursor: pointer;
-    //         transition: background .2s;
-    
-    //         &:hover {
-    //             background: #eeeeee;
-    //         }
-    //     }
-    // }
-    
+    width: 100%;    
     
     td {
         padding-right: 10px;
@@ -21,6 +32,15 @@ table {
     mat-icon { 
         cursor: pointer 
     }
+
+    .mat-icon-button {
+        transition: background .2s;
+    
+        &:hover {
+            background: rgba(236, 236, 236, 0.6);
+        }
+    }
+
 }
 
 .spinner-container {

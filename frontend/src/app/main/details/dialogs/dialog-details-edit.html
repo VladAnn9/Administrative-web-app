@@ -1,19 +1,19 @@
-<h1 mat-dialog-title>Edytuj {{data.nazwa}}</h1>
+<h1 mat-dialog-title>Edytuj {{data.row.nazwa}}</h1>
 <div mat-dialog-content>
   <mat-form-field>
-    <input matInput type="number" min="1" placeholder="Iłość" required [(ngModel)]="data.ilosc">
+    <input matInput type="number" min="1" placeholder="Iłość" required [(ngModel)]="data.row.ilosc">
   </mat-form-field>
   <mat-form-field>
-    <input matInput type="number" min="0" placeholder="Stan" required [(ngModel)]="data.stan">
+    <input matInput type="number" min="0" placeholder="Stan" required [(ngModel)]="data.row.stan">
   </mat-form-field>
   <mat-form-field>
-    <input matInput type="text" placeholder="Uwagi" [(ngModel)]="data.uwagi">
+    <input matInput type="text" placeholder="Uwagi" [(ngModel)]="data.row.uwagi">
   </mat-form-field>
-  <mat-form-field>
-    <input matInput type="number" placeholder="Cena" [(ngModel)]="data.cena">
+  <mat-form-field *ngIf="data.role === 'admin' || data.role === 'root'">
+    <input matInput type="number" placeholder="Cena" [(ngModel)]="data.row.cena">
   </mat-form-field>
 </div>
 <div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">No Thanks</button>
-  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+  <button mat-button (click)="onNoClick()">Anuluj</button>
+  <button mat-button [mat-dialog-close]="data.row" cdkFocusInitial>Edytuj</button>
 </div>

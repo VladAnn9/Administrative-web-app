@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import {MatButtonModule, MatCheckboxModule, MatProgressSpinnerModule} from '@angular/material';
+import {MatButtonModule, MatCheckboxModule, MatProgressSpinnerModule, MatNativeDateModule} from '@angular/material';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatIconModule} from '@angular/material/icon';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -19,6 +19,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatListModule} from '@angular/material/list';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatDatepickerModule} from '@angular/material/datepicker';
 
 @NgModule({
   imports: [
@@ -42,7 +43,9 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
      MatCardModule,
      MatListModule,
      MatAutocompleteModule,
-     MatSlideToggleModule
+     MatSlideToggleModule,
+     MatDatepickerModule,
+     MatNativeDateModule
     ],
   exports: [
     MatButtonModule,
@@ -65,7 +68,8 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
     MatCardModule,
     MatListModule,
     MatAutocompleteModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatDatepickerModule
   ],
 })
 export class MaterialModule { }
